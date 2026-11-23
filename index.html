@@ -55,7 +55,7 @@
   /* customer view */
   .hero { display:flex; gap:12px; align-items:center; padding:16px; border-radius:16px; margin-bottom:14px; color:#fff;
           background:linear-gradient(135deg, var(--pink), var(--orange)); }
-  .hero-ico { width:60px; height:60px; padding:8px; background:rgba(255,255,255,.25); border-radius:16px; }
+  .hero-ico { width:100px; height:100px; padding:8px; background:rgba(255,255,255,.25); border-radius:16px; }
   #chat { height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:10px;
           background:var(--soft); border-radius:12px; margin-bottom:10px; }
   .bubble { max-width:80%; padding:8px 14px; border-radius:16px; }
@@ -179,7 +179,7 @@
   <p class="help">Crew side. Pick a customer message, punch the items into the ticket, then send it to the ready queue.</p>
   <div class="grid" id="pos-orders">
     <div class="card">
-      <h2 data-t="p1">Step 1: Customer messages</h2>
+      <h2 data-t="p1">Customer Messages</h2>
       <div id="inbox" class="scrolly"></div>
       <div class="notes">
         <h3 data-t="notesTitle">Crew Notes</h3>
@@ -192,11 +192,11 @@
       </div>
     </div>
     <div class="card">
-      <h2 data-t="p2">Step 2: Menu (tap to add)</h2>
+      <h2 data-t="p2">Menu</h2>
       <div id="menu" class="menu"></div>
     </div>
     <div class="card">
-      <h2 data-t="p3">Step 3: Ticket</h2>
+      <h2 data-t="p3">Ticket</h2>
       <div id="ticketText" class="help"></div>
       <div id="ticket"></div>
       <div class="row" style="margin-top:10px">
@@ -275,8 +275,8 @@
     <div class="card wide">
       <div class="row">
         <h2 style="margin:0;flex:1" data-t="logTitle">Kernel log</h2>
-        <button onclick="exportJSON()">Export report (JSON)</button>
-        <button onclick="exportCSV()">Export orders (CSV)</button>
+        <button onclick="exportJSON()">Download Report Details</button>
+        <button onclick="exportCSV()">Download Orders Details</button>
       </div>
       <pre id="log"></pre>
     </div>
@@ -326,9 +326,9 @@ const STATIONS = ["Order taking", "Fryer / Grill", "Drink station", "Packing", "
 let viewMode = "story";
 const LABELS = {
   tabUser: ["Customer", "User Mode"], tabPos: ["Crew POS", "Kernel: Order Entry"], tabKitchen: ["Kitchen", "Kernel: Scheduler"],
-  p1: ["Step 1: Customer messages", "Step 1: User requests (inbox)"],
-  p2: ["Step 2: Menu (tap to add)", "Step 2: Menu (build the PCB)"],
-  p3: ["Step 3: Ticket", "Step 3: PCB draft (ticket)"],
+  p1: ["Customer Messages", "User requests (inbox)"],
+  p2: ["Menu", "Menu (build the PCB)"],
+  p3: ["Ticket", "PCB draft (ticket)"],
   send: ["Send to order queue", "Send to ready queue"],
   schedTitle: ["Order Rules", "CPU Scheduler"], quantum: ["Time limit per order", "Time quantum"],
   runTick: ["Next minute", "Run tick"], tmLabel: ["Replay", "Time machine"],
