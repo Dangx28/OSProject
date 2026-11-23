@@ -1,1916 +1,929 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Drive-Thru OS Simulator</title>
-    <style>
-      :root {
-        --bg: #f4f4f7;
-        --card: #fff;
-        --line: #ececf2;
-        --text: #222633;
-        --muted: #7d8497;
-        --soft: #f5f6fa;
-        --pink: #f0386b;
-        --orange: #ff8a3d;
-        --green: #1fb76a;
-        --blue: #3a7bfd;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html {
-        background: var(--bg);
-      }
-      body {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 14px 90px;
-        color: var(--text);
-        font-family: "Segoe UI", system-ui, sans-serif;
-        line-height: 1.4;
-      }
-      h1 {
-        margin: 0;
-        font-size: 1.25rem;
-      }
-      h1 small {
-        color: var(--muted);
-        font-weight: normal;
-        font-size: 0.8rem;
-      }
-      h2 {
-        margin: 0 0 10px;
-        font-size: 1.05rem;
-      }
-      .hidden {
-        display: none !important;
-      }
-      .grid {
-        display: grid;
-        gap: 14px;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      }
-      .wide {
-        grid-column: 1 / -1;
-      }
-      .card {
-        background: var(--card);
-        border-radius: 16px;
-        padding: 16px;
-        box-shadow: 0 2px 10px rgba(30, 35, 60, 0.07);
-      }
-      .row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-      .help {
-        color: var(--muted);
-        margin: 0 0 12px;
-        font-size: 0.9rem;
-      }
-      header {
-        position: sticky;
-        top: 0;
-        z-index: 5;
-        background: var(--card);
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 14px;
-        margin: 0 -14px 14px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-      }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drive-Thru OS Simulator</title>
+<style>
+  :root { --bg:#f5f0e6; --card:#fff; --line:#e3dccb; --text:#3b2f25; --muted:#8a7b68; --soft:#f3eee2;
+          --pink:#6b7c3f; --orange:#b08a5b; --green:#7d8f4e; --blue:#8b6b4a; }
+  * { box-sizing:border-box; }
+  html { background:var(--bg); }
+  body { max-width:1100px; margin:0 auto; padding:0 14px 90px; color:var(--text);
+         font-family:"Segoe UI", system-ui, sans-serif; line-height:1.4; }
+  h1 { margin:0; font-size:1.25rem; display:flex; align-items:center; gap:8px; }
+  h1 small { color:var(--muted); font-weight:normal; font-size:.8rem; }
+  h2 { margin:0 0 10px; font-size:1.05rem; }
+  .hidden { display:none !important; }
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); }
+  .wide { grid-column:1 / -1; }
+  .card { background:var(--card); border-radius:16px; padding:16px; box-shadow:0 2px 10px rgba(60,45,30,.08); }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px; }
+  .help { color:var(--muted); margin:0 0 12px; font-size:.9rem; }
+  header { position:sticky; top:0; z-index:5; background:var(--card); display:flex; flex-wrap:wrap; gap:8px;
+           align-items:center; justify-content:space-between; padding:12px 14px; margin:0 -14px 14px;
+           box-shadow:0 2px 8px rgba(0,0,0,.07); }
 
-      button,
-      select,
-      input,
-      textarea {
-        font: inherit;
-        color: var(--text);
-        background: var(--soft);
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 8px 12px;
-      }
-      button {
-        cursor: pointer;
-        transition:
-          transform 0.1s,
-          background 0.15s;
-      }
-      button:hover {
-        background: #eceef6;
-      }
-      button:active {
-        transform: scale(0.96);
-      }
-      button.main {
-        background: var(--pink);
-        border-color: var(--pink);
-        color: #fff;
-        font-weight: 600;
-        border-radius: 99px;
-        padding: 9px 18px;
-      }
-      button.main:hover {
-        background: #d92d5f;
-      }
-      button.sm {
-        padding: 3px 10px;
-        font-size: 0.8rem;
-        border-radius: 99px;
-      }
-      input[type="number"] {
-        width: 70px;
-      }
-      input[type="range"] {
-        width: 150px;
-        padding: 0;
-      }
-      textarea {
-        flex: 1;
-        min-width: 200px;
-        resize: vertical;
-      }
-      label {
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
+  button, select, input, textarea { font:inherit; color:var(--text); background:var(--soft);
+         border:1px solid var(--line); border-radius:12px; padding:8px 12px; }
+  button { cursor:pointer; transition:transform .1s, background .15s; }
+  button:hover { background:#ebe5d6; }
+  button:active { transform:scale(.96); }
+  button.main { background:var(--pink); border-color:var(--pink); color:#fff; font-weight:600; border-radius:99px; padding:9px 18px; }
+  button.main:hover { background:#596a31; }
+  button.sm { padding:3px 10px; font-size:.8rem; border-radius:99px; }
+  input[type=number] { width:70px; }
+  input[type=range] { width:150px; padding:0; }
+  textarea { flex:1; min-width:200px; resize:vertical; }
+  label { color:var(--muted); font-size:.9rem; }
 
-      .badge {
-        padding: 4px 12px;
-        border-radius: 99px;
-        font-weight: bold;
-        font-size: 0.8rem;
-      }
-      .user {
-        background: #dff6ea;
-        color: #12804a;
-      }
-      .kernel {
-        background: #ffe3ec;
-        color: #c4204f;
-      }
-      .clock {
-        background: #fff1dd;
-        color: #b86100;
-      }
+  .badge { padding:4px 12px; border-radius:99px; font-weight:bold; font-size:.8rem; }
+  .user { background:#e4ecd0; color:#4d5f27; }
+  .kernel { background:#f1e2cf; color:#7a4b1e; }
+  .clock { background:#f4ead8; color:#8a5a1c; }
 
-      /* bottom navigation bar, like a delivery app */
-      .tabs {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 6;
-        display: flex;
-        justify-content: center;
-        gap: 6px;
-        background: var(--card);
-        padding: 8px;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-      }
-      .tabs button {
-        flex: 1;
-        max-width: 220px;
-        background: none;
-        border: none;
-        border-radius: 12px;
-        color: var(--muted);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.8rem;
-        position: relative;
-        padding: 6px;
-      }
-      .tabs button.active {
-        color: var(--pink);
-        font-weight: bold;
-        background: #ffeef3;
-      }
-      .ico {
-        font-size: 1.4rem;
-      }
-      .count {
-        position: absolute;
-        top: 0;
-        right: 22%;
-        background: var(--pink);
-        color: #fff;
-        border-radius: 99px;
-        padding: 0 6px;
-        font-size: 0.7rem;
-      }
-      .count:empty {
-        display: none;
-      }
+  /* bottom navigation bar, like a delivery app */
+  .tabs { position:fixed; left:0; right:0; bottom:0; z-index:6; display:flex; justify-content:center; gap:6px;
+          background:var(--card); padding:8px; box-shadow:0 -2px 10px rgba(0,0,0,.1); }
+  .tabs button { flex:1; max-width:220px; background:none; border:none; border-radius:12px; color:var(--muted);
+          display:flex; flex-direction:column; align-items:center; font-size:.8rem; position:relative; padding:6px; }
+  .tabs button.active { color:var(--pink); font-weight:bold; background:#eef1dd; }
+  .ico { width:26px; height:26px; }
+  .count { position:absolute; top:0; right:22%; background:var(--pink); color:#fff; border-radius:99px; padding:0 6px; font-size:.7rem; }
+  .count:empty { display:none; }
 
-      /* customer view */
-      .hero {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        padding: 16px;
-        border-radius: 16px;
-        margin-bottom: 14px;
-        color: #fff;
-        background: linear-gradient(135deg, var(--pink), var(--orange));
-      }
-      .hero-ico {
-        font-size: 2.4rem;
-        background: rgba(255, 255, 255, 0.25);
-        border-radius: 16px;
-        padding: 6px 12px;
-      }
-      #chat {
-        height: 280px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 10px;
-        background: var(--soft);
-        border-radius: 12px;
-        margin-bottom: 10px;
-      }
-      .bubble {
-        max-width: 80%;
-        padding: 8px 14px;
-        border-radius: 16px;
-      }
-      .bubble.me {
-        align-self: flex-end;
-        background: var(--pink);
-        color: #fff;
-        border-bottom-right-radius: 4px;
-      }
-      .bubble.crew {
-        align-self: flex-start;
-        background: #fff;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-        border-bottom-left-radius: 4px;
-      }
-      .track {
-        background: var(--card);
-        border-radius: 16px;
-        padding: 12px 14px;
-        margin-top: 12px;
-        box-shadow: 0 2px 10px rgba(30, 35, 60, 0.07);
-      }
-      .track small {
-        color: var(--muted);
-      }
+  /* customer view */
+  .hero { display:flex; gap:12px; align-items:center; padding:16px; border-radius:16px; margin-bottom:14px; color:#fff;
+          background:linear-gradient(135deg, var(--pink), var(--orange)); }
+  .hero-ico { width:60px; height:60px; padding:8px; background:rgba(255,255,255,.25); border-radius:16px; }
+  #chat { height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:10px;
+          background:var(--soft); border-radius:12px; margin-bottom:10px; }
+  .bubble { max-width:80%; padding:8px 14px; border-radius:16px; }
+  .bubble.me { align-self:flex-end; background:var(--pink); color:#fff; border-bottom-right-radius:4px; }
+  .bubble.crew { align-self:flex-start; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.08); border-bottom-left-radius:4px; }
+  .track { background:var(--card); border-radius:16px; padding:12px 14px; margin-top:12px; box-shadow:0 2px 10px rgba(60,45,30,.08); }
+  .track small { color:var(--muted); }
 
-      /* POS */
-      .menu {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-        gap: 10px;
-      }
-      .menu button {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        padding: 12px 6px;
-        background: #fff;
-        border: 1px solid var(--line);
-        border-radius: 16px;
-      }
-      .menu small {
-        color: var(--muted);
-      }
-      .food {
-        font-size: 2.1rem;
-        background: #fff3e8;
-        border-radius: 50%;
-        width: 56px;
-        height: 56px;
-        line-height: 56px;
-        text-align: center;
-      }
-      .msg {
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 10px;
-        margin-bottom: 8px;
-      }
-      .msg.sel {
-        border-color: var(--pink);
-        background: #fff7f9;
-      }
-      .msg small {
-        display: block;
-        color: var(--muted);
-        margin: 2px 0 6px;
-      }
-      .ticket-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 6px 0;
-        border-bottom: 1px dashed var(--line);
-      }
+  /* POS */
+  .menu { display:grid; grid-template-columns:repeat(auto-fill, minmax(105px, 1fr)); gap:10px; }
+  .menu button { display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 6px; background:#fff;
+          border:1px solid var(--line); border-radius:16px; }
+  .menu small { color:var(--muted); }
+  .food { background:#f3eee2; border-radius:50%; width:56px; height:56px; overflow:hidden; }
+  .food .pic { object-fit:cover; }
+  .msg { border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px; }
+  .msg.sel { border-color:var(--pink); background:#f6f8ec; }
+  .msg small { display:block; color:var(--muted); margin:2px 0 6px; }
+  .ticket-item { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed var(--line); }
 
-      /* table and states */
-      .scroll {
-        overflow-x: auto;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
-      }
-      th,
-      td {
-        text-align: left;
-        padding: 8px 10px;
-        border-bottom: 1px solid var(--line);
-      }
-      th {
-        color: var(--muted);
-        font-weight: normal;
-        white-space: nowrap;
-      }
-      .tag {
-        padding: 2px 10px;
-        border-radius: 99px;
-        font-size: 0.8rem;
-        white-space: nowrap;
-      }
-      .New {
-        background: #eceef6;
-        color: #555;
-      }
-      .Ready {
-        background: #e3edff;
-        color: #2a5fd0;
-      }
-      .Running {
-        background: #dff6ea;
-        color: #12804a;
-      }
-      .Waiting {
-        background: #fff1d6;
-        color: #a86300;
-      }
-      .Terminated {
-        background: #eceef2;
-        color: var(--muted);
-      }
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-      }
-      .life {
-        display: flex;
-        gap: 2px;
-        margin-top: 4px;
-      }
-      .life i {
-        font-style: normal;
-        font-size: 0.65rem;
-        padding: 1px 6px;
-        border-radius: 99px;
-        background: var(--soft);
-        color: var(--muted);
-      }
-      .life i.on {
-        background: var(--pink);
-        color: #fff;
-        font-weight: bold;
-      }
-      .child td {
-        background: #fafafc;
-        color: var(--muted);
-      }
-      .child td:first-child {
-        padding-left: 26px;
-      }
+  /* table and states */
+  .scroll { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:normal; white-space:nowrap; }
+  .tag { padding:2px 10px; border-radius:99px; font-size:.8rem; white-space:nowrap; }
+  .New { background:#ebe5d6; color:#6b5b48; }
+  .Ready { background:#e8ecd5; color:#55662e; }
+  .Running { background:#e4ecd0; color:#4d5f27; }
+  .Waiting { background:#f3e5cc; color:#8a5a1c; }
+  .Terminated { background:#e9e3d3; color:var(--muted); }
+  .actions { display:flex; flex-wrap:wrap; gap:4px; }
+  .life { display:flex; gap:2px; margin-top:4px; }
+  .life i { font-style:normal; font-size:.65rem; padding:1px 6px; border-radius:99px; background:var(--soft); color:var(--muted); }
+  .life i.on { background:var(--pink); color:#fff; font-weight:bold; }
+  .child td { background:#faf7f0; color:var(--muted); }
+  .child td:first-child { padding-left:26px; }
 
-      /* modal, CPU, metrics, gantt, log */
-      .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(20, 24, 40, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
-        z-index: 10;
-      }
-      .modal {
-        background: var(--card);
-        border-radius: 16px;
-        padding: 18px;
-        max-width: 600px;
-        width: 100%;
-        max-height: 90vh;
-        overflow: auto;
-      }
-      .why {
-        margin-top: 10px;
-        padding: 8px 12px;
-        border-left: 4px solid var(--pink);
-        background: #fff4f7;
-        border-radius: 8px;
-        font-size: 0.9rem;
-      }
-      .cpu {
-        text-align: center;
-        padding: 12px;
-        border: 2px dashed var(--line);
-        border-radius: 12px;
-      }
-      .cpu.busy {
-        border-color: var(--green);
-        background: #f3fcf7;
-      }
-      .cpu .name {
-        font-size: 1.3rem;
-        font-weight: bold;
-      }
-      .bar {
-        height: 10px;
-        background: #eceef2;
-        border-radius: 99px;
-        overflow: hidden;
-        margin: 8px 0 4px;
-      }
-      .bar div {
-        height: 100%;
-        background: linear-gradient(90deg, var(--orange), var(--pink));
-        transition: width 0.3s;
-      }
-      .metrics {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .metric {
-        background: var(--soft);
-        border-radius: 12px;
-        padding: 10px;
-      }
-      .metric b {
-        display: block;
-        font-size: 1.3rem;
-        color: var(--pink);
-      }
-      .metric span {
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
-      .gantt {
-        display: flex;
-        gap: 2px;
-        overflow-x: auto;
-        padding-bottom: 6px;
-      }
-      .cell {
-        min-width: 36px;
-        text-align: center;
-        font-size: 0.75rem;
-        color: var(--muted);
-      }
-      .cell div {
-        height: 32px;
-        line-height: 32px;
-        border-radius: 6px;
-        color: #fff;
-        font-weight: bold;
-      }
-      .cell .idle {
-        background: #eceef2;
-        color: var(--muted);
-      }
-      #log {
-        margin: 0;
-        height: 200px;
-        overflow-y: auto;
-        background: #1b1f2b;
-        color: #6ee7a8;
-        padding: 10px;
-        border-radius: 12px;
-        font:
-          0.85rem/1.5 Consolas,
-          monospace;
-        white-space: pre-wrap;
-      }
-      .vm {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-      .vm > span {
-        font-weight: 600;
-        font-size: 0.85rem;
-      }
-      .vm button {
-        border-radius: 99px;
-        font-weight: 600;
-      }
-      .vm button.on {
-        background: var(--pink);
-        border-color: var(--pink);
-        color: #fff;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>🍔 Drive-Thru Express <small>OS Simulator</small></h1>
-      <div class="vm">
-        <span>View Mode:</span>
-        <button id="vm-story" onclick="setView('story')">
-          🍔 Fast-Food Story Mode
-        </button>
-        <button id="vm-os" onclick="setView('os')">⚙️ Technical OS Mode</button>
-      </div>
-      <div class="row" style="margin: 0">
-        <span id="mode" class="badge user">USER MODE</span>
-        <span id="clock" class="badge clock">Time: 0</span>
-        <button class="sm" onclick="loadDemo()">Load demo orders</button>
-        <button class="sm" onclick="resetAll()">Reset</button>
-      </div>
-    </header>
+  /* modal, CPU, metrics, gantt, log */
+  .overlay { position:fixed; inset:0; background:rgba(40,30,20,.5); display:flex; align-items:center; justify-content:center; padding:16px; z-index:10; }
+  .modal { background:var(--card); border-radius:16px; padding:18px; max-width:600px; width:100%; max-height:90vh; overflow:auto; }
+  .why { margin-top:10px; padding:8px 12px; border-left:4px solid var(--pink); background:#f4f6e8; border-radius:8px; font-size:.9rem; }
+  .cpu { text-align:center; padding:12px; border:2px dashed var(--line); border-radius:12px; }
+  .cpu.busy { border-color:var(--green); background:#f4f7e8; }
+  .cpu .name { font-size:1.3rem; font-weight:bold; }
+  .bar { height:10px; background:#e9e3d3; border-radius:99px; overflow:hidden; margin:8px 0 4px; }
+  .bar div { height:100%; background:linear-gradient(90deg, var(--orange), var(--pink)); transition:width .3s; }
+  .metrics { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .metric { background:var(--soft); border-radius:12px; padding:10px; }
+  .metric b { display:block; font-size:1.3rem; color:var(--pink); }
+  .metric span { color:var(--muted); font-size:.8rem; }
+  .gantt { display:flex; overflow-x:auto; padding:0 16px; }
+  .seg { position:relative; flex:none; padding-bottom:30px; }
+  .seg .blk { height:44px; line-height:44px; margin-right:2px; border-radius:6px; text-align:center;
+              color:#fff; font-style:italic; overflow:hidden; white-space:nowrap; }
+  .seg .blk.idle { background:#e9e3d3; color:var(--muted); }
+  .seg .tk { position:absolute; top:50px; transform:translateX(-50%); font-weight:bold; color:var(--text); }
+  #log { margin:0; height:200px; overflow-y:auto; background:#2e2820; color:#c9d79a; padding:10px;
+         border-radius:12px; font:.85rem/1.5 Consolas, monospace; white-space:pre-wrap; }
+  .vm { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .vm > span { font-weight:600; font-size:.85rem; }
+  .vm button { border-radius:99px; font-weight:600; }
+  .vm button.on { background:var(--pink); border-color:var(--pink); color:#fff; }
+  .pills button { border-radius:99px; font-weight:600; }
+  .pills button.on { background:var(--pink); border-color:var(--pink); color:#fff; }
+  .scrolly { max-height:190px; overflow-y:auto; }
+  .notes { margin-top:12px; padding-top:10px; border-top:1px solid var(--line); }
+  .notes h3 { margin:0 0 4px; font-size:.9rem; }
+  .help.small { font-size:.78rem; margin:0 0 8px; }
+  #notesList { max-height:140px; }
+  .note { display:flex; gap:6px; align-items:center; padding:4px 0; border-bottom:1px dashed var(--line); font-size:.85rem; }
+  .note span { flex:1; overflow-wrap:anywhere; white-space:pre-wrap; }
+  .pic { width:100%; height:100%; object-fit:contain; display:block; }
+  .logo { display:inline-block; width:30px; height:30px; }
+  .mini { display:inline-block; width:18px; height:18px; vertical-align:-4px; }
+  .pics { display:inline-flex; gap:2px; margin-right:6px; vertical-align:middle; }
+  .pics .pic { width:22px; height:22px; }
+  .cpu .name .pics .pic { width:32px; height:32px; }
+</style>
+</head>
+<body>
 
-    <nav class="tabs">
-      <button id="tab-user" onclick="show('user')">
-        <span class="ico">💬</span><span data-t="tabUser">Customer</span>
-      </button>
-      <button id="tab-pos" onclick="show('pos')">
-        <span class="ico">🧾</span><span data-t="tabPos">Crew POS</span>
-        <span id="inboxCount" class="count"></span>
-      </button>
-      <button id="tab-kitchen" onclick="show('kitchen')">
-        <span class="ico">👨‍🍳</span><span data-t="tabKitchen">Kitchen</span>
-        <span id="queueCount" class="count"></span>
-      </button>
-    </nav>
+<header>
+  <h1><span class="logo" data-img="logo"></span> Drive-Thru Express <small>OS Simulator</small></h1>
+  <div class="vm">
+    <span>View Mode:</span>
+    <button id="vm-story" onclick="setView('story')"><span class="mini" data-img="story"></span> Fast-Food Story Mode</button>
+    <button id="vm-os" onclick="setView('os')"><span class="mini" data-img="os"></span> Technical OS Mode</button>
+  </div>
+  <div class="row" style="margin:0">
+    <span id="mode" class="badge user">USER MODE</span>
+    <span id="clock" class="badge clock">Time: 0</span>
+    <button class="sm" onclick="loadDemo()">Load demo orders</button>
+    <button class="sm" onclick="resetAll()">Reset</button>
+  </div>
+</header>
 
-    <!-- ========== USER MODE: customer at the speaker box ========== -->
-    <section id="view-user">
-      <div class="hero">
-        <div class="hero-ico">🍔</div>
-        <div>
-          <b style="font-size: 1.1rem">Drive-Thru Express</b>
-          <div>⭐ 4.8 &bull; 🛵 15-25 min &bull; Fast food</div>
-        </div>
-      </div>
-      <p class="help">
-        You are the customer at the speaker box. Type your whole order and send
-        it. The crew reads it in the Crew POS tab.
-      </p>
-      <div class="card">
-        <div id="chat"></div>
-        <div class="row">
-          <textarea
-            id="msg"
-            rows="2"
-            placeholder="Example: One burger and a large fries, please"
-            onkeydown="
-              if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-              }
-            "
-          ></textarea>
-          <button class="main" onclick="sendMessage()">Send to crew</button>
-        </div>
-      </div>
-      <div id="tracker"></div>
-    </section>
+<nav class="tabs">
+  <button id="tab-user" onclick="show('user')"><span class="ico" data-img="chat"></span><span data-t="tabUser">Customer</span></button>
+  <button id="tab-pos" onclick="show('pos')"><span class="ico" data-img="pos"></span><span data-t="tabPos">Crew POS</span> <span id="inboxCount" class="count"></span></button>
+  <button id="tab-kitchen" onclick="show('kitchen')"><span class="ico" data-img="kitchen"></span><span data-t="tabKitchen">Kitchen</span> <span id="queueCount" class="count"></span></button>
+</nav>
 
-    <!-- ========== KERNEL MODE 1: crew POS ========== -->
-    <section id="view-pos" class="hidden">
-      <p class="help">
-        Crew side. Pick a customer message, punch the items into the ticket,
-        then send it to the ready queue.
-      </p>
-      <div class="grid">
-        <div class="card">
-          <h2 data-t="p1">Step 1: Customer messages</h2>
-          <div id="inbox"></div>
-        </div>
-        <div class="card">
-          <h2 data-t="p2">Step 2: Menu (tap to add)</h2>
-          <div id="menu" class="menu"></div>
-        </div>
-        <div class="card">
-          <h2 data-t="p3">Step 3: Ticket</h2>
-          <div id="ticketText" class="help"></div>
-          <div id="ticket"></div>
-          <div class="row" style="margin-top: 10px">
-            <label>Order type</label>
-            <select id="priority">
-              <option value="1">VIP</option>
-              <option value="2" selected>Drive-Thru</option>
-              <option value="3">Delivery</option>
-            </select>
-          </div>
-          <div class="row">
-            <button class="main" onclick="finalizeOrder()" data-t="send">
-              Send to ready queue
-            </button>
-            <button
-              onclick="
-                ticket = [];
-                activeMsg = null;
-                render();
-              "
-            >
-              Clear ticket
-            </button>
-          </div>
-          <div id="posHint" class="help"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== KERNEL MODE 2: kitchen / scheduler ========== -->
-    <section id="view-kitchen" class="hidden">
-      <p class="help">
-        Choose a scheduling algorithm, then press "Run tick" (one time step) or
-        "Auto run". Use the buttons on each order to make system calls.
-      </p>
-      <div class="grid">
-        <div class="card">
-          <h2 data-t="schedTitle">Scheduler</h2>
-          <div class="row">
-            <label>Algorithm</label>
-            <select id="algo">
-              <option value="FCFS">FCFS (first come, first served)</option>
-              <option value="SJF">SJF (shortest job first)</option>
-              <option value="RR">Round Robin</option>
-              <option value="PRIORITY">Priority (VIP first)</option>
-            </select>
-          </div>
-          <div class="row">
-            <label data-t="quantum">Time quantum</label>
-            <input type="number" id="quantum" value="3" min="1" />
-            <label>(Round Robin only)</label>
-          </div>
-          <div class="row">
-            <button class="main" onclick="tick()" data-t="runTick">
-              Run tick
-            </button>
-            <button id="runBtn" onclick="toggleRun()">Auto run</button>
-          </div>
-          <div class="row">
-            <label data-t="tmLabel">Time machine</label>
-            <button onclick="stepBack()">◀ Back</button>
-            <input
-              type="range"
-              id="scrub"
-              min="0"
-              max="0"
-              value="0"
-              oninput="gotoStep(this.value)"
-            />
-            <button onclick="stepForward()">Forward ▶</button>
-          </div>
-          <div id="histLabel" class="help"></div>
-        </div>
-        <div class="card">
-          <h2 data-t="cpuTitle">Workstation (CPU)</h2>
-          <div id="cpu" class="cpu"></div>
-          <div id="why" class="why"></div>
-        </div>
-        <div class="card">
-          <h2 data-t="metricsTitle">Performance metrics</h2>
-          <div id="metrics" class="metrics"></div>
-        </div>
-        <div class="card wide">
-          <h2 data-t="queueTitle">Ready queue (Process Control Blocks)</h2>
-          <div class="scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th data-t="hPid">PID</th>
-                  <th data-t="hName">Order</th>
-                  <th data-t="hBurst">Burst</th>
-                  <th data-t="hRem">Remaining</th>
-                  <th data-t="hPrio">Priority</th>
-                  <th data-t="hState">State</th>
-                  <th data-t="hTcb">Sub-tasks (TCB)</th>
-                  <th data-t="hStation">Station</th>
-                  <th data-t="hCalls">System calls</th>
-                </tr>
-              </thead>
-              <tbody id="table"></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="card wide">
-          <h2 data-t="ganttTitle">Live Gantt chart</h2>
-          <div id="gantt" class="gantt"></div>
-        </div>
-        <div class="card wide">
-          <div class="row">
-            <h2 style="margin: 0; flex: 1" data-t="logTitle">Kernel log</h2>
-            <button onclick="exportJSON()">Export report (JSON)</button>
-            <button onclick="exportCSV()">Export orders (CSV)</button>
-          </div>
-          <pre id="log"></pre>
-        </div>
-      </div>
-    </section>
-
-    <div
-      id="modal"
-      class="overlay hidden"
-      onclick="if (event.target === this) closeTCB();"
-    >
-      <div class="modal" id="modalBody"></div>
+<!-- ========== USER MODE: customer at the speaker box ========== -->
+<section id="view-user">
+  <div class="hero"><div class="hero-ico" data-img="logo"></div>
+    <div><b style="font-size:1.1rem">Drive-Thru Express</b><div><span class="mini" data-img="rating"></span> 4.8 &bull; <span class="mini" data-img="delivery"></span> 15-25 min &bull; Fast food</div></div></div>
+  <p class="help">You are the customer at the speaker box. Type your whole order and send it. The crew reads it in the Crew POS tab.</p>
+  <div class="card">
+    <div id="chat"></div>
+    <div class="row">
+      <textarea id="msg" rows="2" placeholder="Example: One spaghetti and a large fries, please" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+      <button class="main" onclick="sendMessage()">Send to crew</button>
     </div>
+  </div>
+  <div id="tracker"></div>
+</section>
 
-    <script>
-      // ---------- Constants ----------
-      const MENU = [
-        { name: "Burger", burst: 4, threads: [] },
-        { name: "Fries", burst: 2, threads: [] },
-        { name: "Soft Drink", burst: 1, threads: [] },
-        { name: "Chicken Bucket", burst: 8, threads: [] },
-        {
-          name: "Combo Meal",
-          burst: 6,
-          threads: ["Choose drink (Coke)", "Choose side (Fries)"],
-          children: ["Burger", "Drink", "Fries"],
-        },
-        {
-          name: "Family Combo",
-          burst: 10,
-          threads: [
-            "Choose drink (Sprite)",
-            "Choose side (Rice)",
-            "Choose dessert (Sundae)",
-          ],
-          children: ["Burger", "Chicken", "Fries", "Drink"],
-        },
-      ];
-      const ICONS = {
-        Burger: "🍔",
-        Fries: "🍟",
-        "Soft Drink": "🥤",
-        "Chicken Bucket": "🍗",
-        "Combo Meal": "🍱",
-        "Family Combo": "🍽️",
-        Chicken: "🍗",
-        Drink: "🥤",
-      };
-      MENU.forEach((item) => (item.icon = ICONS[item.name]));
-      const PRIORITY_NAMES = { 1: "VIP", 2: "Drive-Thru", 3: "Delivery" };
-      const STATIONS = [
-        "Order taking",
-        "Fryer / Grill",
-        "Drink station",
-        "Packing",
-        "Pickup window",
-      ];
-      // ---------- View mode: every label has a [Story, OS] pair ----------
-      let viewMode = "story";
-      const LABELS = {
-        tabUser: ["Customer", "User Mode"],
-        tabPos: ["Crew POS", "Kernel: Order Entry"],
-        tabKitchen: ["Kitchen", "Kernel: Scheduler"],
-        p1: ["Step 1: Customer messages", "Step 1: User requests (inbox)"],
-        p2: ["Step 2: Menu (tap to add)", "Step 2: Menu (build the PCB)"],
-        p3: ["Step 3: Ticket", "Step 3: PCB draft (ticket)"],
-        send: ["Send to order queue", "Send to ready queue"],
-        schedTitle: ["Order Rules", "CPU Scheduler"],
-        quantum: ["Time limit per order", "Time quantum"],
-        runTick: ["Next minute", "Run tick"],
-        tmLabel: ["Replay", "Time machine"],
-        cpuTitle: ["Prep Station", "CPU Execution Unit"],
-        metricsTitle: ["Kitchen Performance", "Performance Metrics"],
-        queueTitle: ["Order Queue", "Ready Queue (Process Control Blocks)"],
-        ganttTitle: ["Order Timeline", "Live Gantt Chart"],
-        logTitle: ["Kitchen Activity Log", "Kernel Trace Log"],
-        hPid: ["Order #", "PID"],
-        hName: ["Order", "Process"],
-        hBurst: ["Prep Time", "CPU Burst"],
-        hRem: ["Time Left", "Remaining Time"],
-        hPrio: ["Order Type", "Priority"],
-        hState: ["Status", "State"],
-        hTcb: ["Meal Sub-items", "Thread Control Blocks [TCB]"],
-        hStation: ["Station", "Registers (station)"],
-        hCalls: ["Actions", "System Calls"],
-        bIO: ["Card check", "I/O Request"],
-        bYield: ["Pause order", "Yield"],
-        bThread: ["+ Meal sub-item", "Create Thread"],
-        bJoin: ["Confirm sub-items", "Join Threads"],
-        bTerm: ["Cancel order", "Terminate Process"],
-        bRemove: ["Clear order", "Terminate (remove)"],
-        bTCB: ["View sub-items", "View TCB"],
-        child: ["Meal part", "Child"],
-        childOf: ["part of order", "child of"],
-        mTitle: ["Meal sub-items for order", "Thread Control Blocks of PCB"],
-        mTid: ["Item", "TID"],
-        mThread: ["Sub-item", "Thread"],
-        mRegs: ["Notes", "Local registers"],
-        hReg: ["Station", "Register (current station)"],
-        mWait: ["Average wait time", "Average Waiting Time"],
-        mTurn: ["Average time to serve", "Average Turnaround Time"],
-        mResp: ["Average time to start", "Average Response Time"],
-        mCtx: [
-          "Prep switches / orders done",
-          "Context switches / processes done",
-        ],
-        cpuIdle: [
-          "No order at the prep station",
-          "CPU idle: no process running",
-        ],
-      };
-      const L = (key) => LABELS[key][viewMode === "story" ? 0 : 1];
+<!-- ========== KERNEL MODE 1: crew POS ========== -->
+<section id="view-pos" class="hidden">
+  <p class="help">Crew side. Pick a customer message, punch the items into the ticket, then send it to the ready queue.</p>
+  <div class="grid" id="pos-orders">
+    <div class="card">
+      <h2 data-t="p1">Step 1: Customer messages</h2>
+      <div id="inbox" class="scrolly"></div>
+      <div class="notes">
+        <h3 data-t="notesTitle">Crew Notes</h3>
+        <p class="help small" data-t="notesHelp"></p>
+        <div class="row" style="margin-bottom:6px">
+          <input type="text" id="noteInput" placeholder="Type a note..." style="flex:1;min-width:0" onkeydown="if (event.key === 'Enter') addNote()">
+          <button class="sm main" onclick="addNote()">Add</button>
+        </div>
+        <div id="notesList"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 data-t="p2">Step 2: Menu (tap to add)</h2>
+      <div id="menu" class="menu"></div>
+    </div>
+    <div class="card">
+      <h2 data-t="p3">Step 3: Ticket</h2>
+      <div id="ticketText" class="help"></div>
+      <div id="ticket"></div>
+      <div class="row" style="margin-top:10px">
+        <label>Order type</label>
+        <select id="priority">
+          <option value="1">VIP</option>
+          <option value="2" selected>Drive-Thru</option>
+          <option value="3">Delivery</option>
+        </select>
+      </div>
+      <div class="row">
+        <button class="main" onclick="finalizeOrder()" data-t="send">Send to ready queue</button>
+        <button onclick="ticket = []; activeMsg = null; render()">Clear ticket</button>
+      </div>
+      <div id="posHint" class="help"></div>
+    </div>
+  </div>
+</section>
 
-      const STATE_TEXT = {
-        New: ["New order", "New"],
-        Ready: ["Waiting in line", "Ready"],
-        Running: ["Being prepared", "Running"],
-        Waiting: ["On hold", "Waiting (Blocked)"],
-        Terminated: ["Done", "Terminated"],
-      };
-      const stateLabel = (state) =>
-        STATE_TEXT[state][viewMode === "story" ? 0 : 1];
-      const PILLS = {
-        New: "New",
-        Ready: "Queued",
-        Running: "Preparing",
-        Waiting: "On hold",
-        Terminated: "Done",
-      };
-      const pill = (name) => (viewMode === "story" ? PILLS[name] : name);
+<!-- ========== KERNEL MODE 2: kitchen / scheduler ========== -->
+<section id="view-kitchen" class="hidden">
+  <p class="help">Choose a scheduling algorithm, then press "Run tick" (one time step) or "Auto run". Use the buttons on each order to make system calls.</p>
+  <div class="grid">
+    <div class="card">
+      <h2 data-t="schedTitle">Scheduler</h2>
+      <div class="row">
+        <label>Algorithm</label>
+        <select id="algo">
+          <option value="FCFS">FCFS (first come, first served)</option>
+          <option value="SJF">SJF (shortest job first)</option>
+          <option value="RR">Round Robin</option>
+          <option value="PRIORITY">Priority (VIP first)</option>
+        </select>
+      </div>
+      <div class="row">
+        <label data-t="quantum">Time quantum</label>
+        <input type="number" id="quantum" value="3" min="1">
+        <label>(Round Robin only)</label>
+      </div>
+      <div class="row">
+        <button class="main" onclick="tick()" data-t="runTick">Run tick</button>
+        <button id="runBtn" onclick="toggleRun()">Auto run</button>
+      </div>
+      <div class="row">
+        <label data-t="tmLabel">Time machine</label>
+        <button onclick="stepBack()">◀ Back</button>
+        <input type="range" id="scrub" min="0" max="0" value="0" oninput="gotoStep(this.value)">
+        <button onclick="stepForward()">Forward ▶</button>
+      </div>
+      <div id="histLabel" class="help"></div>
+    </div>
+    <div class="card">
+      <h2 data-t="cpuTitle">Workstation (CPU)</h2>
+      <div id="cpu" class="cpu"></div>
+      <div id="why" class="why"></div>
+    </div>
+    <div class="card">
+      <h2 data-t="metricsTitle">Performance metrics</h2>
+      <div id="metrics" class="metrics"></div>
+    </div>
+    <div class="card wide">
+      <h2 data-t="queueTitle">Ready queue (Process Control Blocks)</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th data-t="hPid">PID</th><th data-t="hName">Order</th><th data-t="hBurst">Burst</th>
+            <th data-t="hRem">Remaining</th><th data-t="hPrio">Priority</th><th data-t="hState">State</th>
+            <th data-t="hTcb">Sub-tasks (TCB)</th><th data-t="hStation">Station</th><th data-t="hCalls">System calls</th></tr></thead>
+          <tbody id="table"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card wide">
+      <h2 data-t="ganttTitle">Live Gantt chart</h2>
+      <div id="gantt" class="gantt"></div>
+    </div>
+    <div class="card wide">
+      <div class="row">
+        <h2 style="margin:0;flex:1" data-t="logTitle">Kernel log</h2>
+        <button onclick="exportJSON()">Export report (JSON)</button>
+        <button onclick="exportCSV()">Export orders (CSV)</button>
+      </div>
+      <pre id="log"></pre>
+    </div>
+  </div>
+</section>
 
-      // In Story Mode, log and "Why?" text is shown with restaurant words (display only; the data is unchanged)
-      const STORY_WORDS = [
-        [/made an I\/O Request/g, "started a card check"],
-        [/I\/O Request/g, "Card check"],
-        [/I\/O complete/g, "Card approved"],
-        [/Create Process/g, "New order"],
-        [/moved New -> Ready/g, "joined the order queue"],
-        [/Dispatch/g, "Prep started"],
-        [/Context switch/g, "Switched order"],
-        [/Quantum expired/g, "Time limit reached"],
-        [/time quantum/g, "time limit"],
-        [/Preempted/g, "Bumped"],
-        [/Preempt/g, "Bumped"],
-        [/Yield:/g, "Pause:"],
-        [/yielded/g, "paused"],
-        [/Create Thread/g, "New sub-item"],
-        [/Join Thread/g, "Sub-items confirmed"],
-        [/Terminate Process/g, "Order cleared"],
-        [/sub-tasks/g, "sub-items"],
-        [/remaining burst/g, "time left"],
-        [/the workstation/g, "the prep station"],
-        [/CPU idle/g, "Prep station idle"],
-        [/Kernel booted/g, "Kitchen opened"],
-        [/ticks/g, "minutes"],
-      ];
-      const words = (text) =>
-        viewMode === "story"
-          ? STORY_WORDS.reduce((t, [from, to]) => t.replace(from, to), text)
-          : text;
+<div id="modal" class="overlay hidden" onclick="if (event.target === this) closeTCB()"><div class="modal" id="modalBody"></div></div>
 
-      function setView(mode) {
-        viewMode = mode;
-        render();
-      } // only labels change; the simulation keeps running
+<script>
+// ---------- Images: put your own files in an "images" folder next to index.html ----------
+// Change a file name here if yours is named differently. A missing file shows a grey placeholder.
+const IMG_DIR = "images/";
+const IMAGES = {
+  logo: "logo.png", chat: "nav-customer.png", pos: "nav-pos.png", kitchen: "nav-kitchen.png",
+  story: "mode-story.png", os: "mode-os.png", rating: "star.png", delivery: "delivery.png",
+  preparing: "status-preparing.png", ready: "status-ready.png", hold: "status-hold.png",
+  "Spaghetti": "spaghetti.png", "Fries": "fries.png", "Sundae": "sundae.png", "Drinks": "drinks.png",
+  "Chicken": "chicken.png", "Kiddie Meal": "kiddie-meal.png", "Combo Meal": "combo-meal.png",
+  "Family Meal": "family-meal.png", "Drink": "drinks.png"
+};
+const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23e9e3d3'/><circle cx='32' cy='32' r='14' fill='none' stroke='%238a7b68' stroke-width='4'/></svg>";
 
-      const IO_TICKS = 3; // ticks the card check takes
+function img(key) {
+  const file = IMAGES[key];
+  return '<img class="pic" alt="" src="' + (file ? IMG_DIR + file : PLACEHOLDER) + '" onerror="this.onerror=null;this.src=PLACEHOLDER">';
+}
+function orderPics(p) { return '<span class="pics">' + (p.iconKeys || []).map(img).join("") + "</span>"; }
+function loadStaticImages() { document.querySelectorAll("[data-img]").forEach(el => el.innerHTML = img(el.dataset.img)); }
 
-      // ---------- State ----------
-      let procs = [],
-        completed = [],
-        logs = [],
-        gantt = [];
-      let inbox = [],
-        chat = [],
-        ticket = [];
-      let activeMsg = null; // customer message the crew is working on
-      let running = null; // PCB on the CPU right now
-      let lastPid = null; // last PID that ran (for counting context switches)
-      let time = 0,
-        nextPid = 1,
-        nextTid = 1,
-        nextMsgId = 1,
-        queueCounter = 0;
-      let quantumUsed = 0,
-        ctxSwitches = 0,
-        timer = null;
-      let why = ""; // explanation of the last scheduler decision
-      let history = [],
-        pos = 0; // time machine: one saved state per tick
-      let tcbPid = null; // order whose TCB modal is open
+// ---------- Constants ----------
+const MENU = [
+  { name: "Spaghetti",   burst: 5,  threads: [] },
+  { name: "Fries",       burst: 2,  threads: [] },
+  { name: "Sundae",      burst: 2,  threads: [] },
+  { name: "Drinks",      burst: 1,  threads: [] },
+  { name: "Chicken",     burst: 4,  threads: [] },
+  { name: "Kiddie Meal", burst: 5,  threads: ["Choose drink (Juice)", "Choose toy (Surprise)"],
+                         children: ["Spaghetti", "Fries", "Sundae"] },
+  { name: "Combo Meal",  burst: 6,  threads: ["Choose drink (Coke)", "Choose side (Fries)"],
+                         children: ["Chicken", "Fries", "Drink"] },
+  { name: "Family Meal", burst: 10, threads: ["Choose drink (Sprite)", "Choose side (Rice)", "Choose dessert (Sundae)"],
+                         children: ["Spaghetti", "Chicken", "Fries", "Drink"] }
+];
+const PRIORITY_NAMES = { 1: "VIP", 2: "Drive-Thru", 3: "Delivery" };
+const STATIONS = ["Order taking", "Fryer / Grill", "Drink station", "Packing", "Pickup window"];
+// ---------- View mode: every label has a [Story, OS] pair ----------
+let viewMode = "story";
+const LABELS = {
+  tabUser: ["Customer", "User Mode"], tabPos: ["Crew POS", "Kernel: Order Entry"], tabKitchen: ["Kitchen", "Kernel: Scheduler"],
+  p1: ["Step 1: Customer messages", "Step 1: User requests (inbox)"],
+  p2: ["Step 2: Menu (tap to add)", "Step 2: Menu (build the PCB)"],
+  p3: ["Step 3: Ticket", "Step 3: PCB draft (ticket)"],
+  send: ["Send to order queue", "Send to ready queue"],
+  schedTitle: ["Order Rules", "CPU Scheduler"], quantum: ["Time limit per order", "Time quantum"],
+  runTick: ["Next minute", "Run tick"], tmLabel: ["Replay", "Time machine"],
+  cpuTitle: ["Prep Station", "CPU Execution Unit"], metricsTitle: ["Kitchen Performance", "Performance Metrics"],
+  queueTitle: ["Order Queue", "Ready Queue (Process Control Blocks)"],
+  ganttTitle: ["Order Timeline", "Live Gantt Chart"], logTitle: ["Kitchen Activity Log", "Kernel Trace Log"],
+  hPid: ["Order #", "PID"], hName: ["Order", "Process"], hBurst: ["Prep Time", "CPU Burst"],
+  hRem: ["Time Left", "Remaining Time"], hPrio: ["Order Type", "Priority"], hState: ["Status", "State"],
+  hTcb: ["Meal Sub-items", "Thread Control Blocks [TCB]"], hStation: ["Station", "Registers (station)"],
+  hCalls: ["Actions", "System Calls"],
+  bIO: ["Card check", "I/O Request"], bYield: ["Pause order", "Yield"], bThread: ["+ Meal sub-item", "Create Thread"],
+  bJoin: ["Confirm sub-items", "Join Threads"], bTerm: ["Cancel order", "Terminate Process"],
+  bRemove: ["Clear order", "Terminate (remove)"], bTCB: ["View sub-items", "View TCB"],
+  child: ["Meal part", "Child"], childOf: ["part of order", "child of"],
+  mTitle: ["Meal sub-items for order", "Thread Control Blocks of PCB"], mTid: ["Item", "TID"],
+  mThread: ["Sub-item", "Thread"], mRegs: ["Notes", "Local registers"], hReg: ["Station", "Register (current station)"],
+  mWait: ["Average wait time", "Average Waiting Time"], mTurn: ["Average time to serve", "Average Turnaround Time"],
+  mResp: ["Average time to start", "Average Response Time"], mCtx: ["Prep switches / orders done", "Context switches / processes done"],
+  cpuIdle: ["No order at the prep station", "CPU idle: no process running"],
+  notesTitle: ["Crew Notes", "Private Resources (per-thread notes)"],
+  notesHelp: ["Private to the crew: reminders, special requests, sugar scoops.",
+              "Private resources: only this thread can read or change them (unlike the shared register, inventory and receipt)."]
+};
+const L = key => LABELS[key][viewMode === "story" ? 0 : 1];
 
-      const $ = (id) => document.getElementById(id);
-      const esc = (text) =>
-        String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-      function log(message) {
-        logs.push("[t=" + time + "] " + message);
+const STATE_TEXT = { New: ["New order", "New"], Ready: ["Waiting in line", "Ready"], Running: ["Being prepared", "Running"],
+                     Waiting: ["On hold", "Waiting (Blocked)"], Terminated: ["Done", "Terminated"] };
+const stateLabel = state => STATE_TEXT[state][viewMode === "story" ? 0 : 1];
+const PILLS = { New: "New", Ready: "Queued", Running: "Preparing", Waiting: "On hold", Terminated: "Done" };
+const pill = name => viewMode === "story" ? PILLS[name] : name;
+
+// In Story Mode, log and "Why?" text is shown with restaurant words (display only; the data is unchanged)
+const STORY_WORDS = [
+  [/made an I\/O Request/g, "started a card check"], [/I\/O Request/g, "Card check"], [/I\/O complete/g, "Card approved"],
+  [/Create Process/g, "New order"], [/moved New -> Ready/g, "joined the order queue"], [/Dispatch/g, "Prep started"],
+  [/Context switch/g, "Switched order"], [/Quantum expired/g, "Time limit reached"], [/time quantum/g, "time limit"],
+  [/Preempted/g, "Bumped"], [/Preempt/g, "Bumped"], [/Yield:/g, "Pause:"], [/yielded/g, "paused"],
+  [/Create Thread/g, "New sub-item"], [/Join Thread/g, "Sub-items confirmed"], [/Terminate Process/g, "Order cleared"],
+  [/sub-tasks/g, "sub-items"], [/remaining burst/g, "time left"], [/the workstation/g, "the prep station"],
+  [/CPU idle/g, "Prep station idle"], [/Kernel booted/g, "Kitchen opened"], [/ticks/g, "minutes"]
+];
+const words = text => viewMode === "story" ? STORY_WORDS.reduce((t, [from, to]) => t.replace(from, to), text) : text;
+
+function setView(mode) { viewMode = mode; render(); renderNotes(); }   // only labels change; the simulation keeps running
+
+const IO_TICKS = 3;   // ticks the card check takes
+
+// ---------- State ----------
+let procs = [], completed = [], logs = [], gantt = [];
+let inbox = [], chat = [], ticket = [];
+let activeMsg = null;          // customer message the crew is working on
+let running = null;            // PCB on the CPU right now
+let lastPid = null;            // last PID that ran (for counting context switches)
+let time = 0, nextPid = 1, nextTid = 1, nextMsgId = 1, queueCounter = 0;
+let quantumUsed = 0, ctxSwitches = 0, timer = null;
+let why = "";                  // explanation of the last scheduler decision
+let history = [], pos = 0;     // time machine: one saved state per tick
+let tcbPid = null;             // order whose TCB modal is open
+
+const $ = id => document.getElementById(id);
+const esc = text => String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+function log(message) { logs.push("[t=" + time + "] " + message); }
+function say(from, text) { chat.push({ from: from, text: text }); }
+
+// ---------- Tabs and mode ----------
+function show(view) {
+  ["user", "pos", "kitchen"].forEach(v => {
+    $("view-" + v).classList.toggle("hidden", v !== view);
+    $("tab-" + v).classList.toggle("active", v === view);
+  });
+  const mode = view === "user" ? "user" : "kernel";
+  $("mode").textContent = mode.toUpperCase() + " MODE";
+  $("mode").className = "badge " + mode;
+}
+
+// Every system-call button runs through here, then the screen is redrawn.
+function sys(action) { action(); render(); }
+
+// ---------- User mode: customer chat ----------
+function sendMessage() {
+  const text = $("msg").value.trim();
+  if (!text) return;
+  // The arrival time is the moment the car speaks at the speaker box
+  inbox.push({ id: nextMsgId++, text: text, time: time, handled: false });
+  say("me", text);
+  say("crew", "Got it! The crew is reading your order.");
+  $("msg").value = "";
+  render();
+}
+
+// ---------- Kernel mode: POS ----------
+function pickMessage(id) { activeMsg = id; render(); }
+function addItem(index) { ticket.push(MENU[index]); render(); }
+function removeItem(index) { ticket.splice(index, 1); render(); }
+
+function finalizeOrder() {
+  if (ticket.length === 0) { $("posHint").textContent = "Add at least one menu item first."; return; }
+  const msg = inbox.find(m => m.id === activeMsg);
+  const p = createProcess(ticket, Number($("priority").value), msg);
+  if (msg) msg.handled = true;
+  say("crew", "Order #" + p.pid + " confirmed: " + p.name + ". Please wait at the speaker box.");
+  ticket = []; activeMsg = null;
+  render();
+  $("posHint").textContent = "Order #" + p.pid + " was sent to the ready queue.";
+}
+
+// ---------- System calls ----------
+function createProcess(items, priority, msg) {
+  const total = items.reduce((sum, item) => sum + item.burst, 0);
+  const p = {
+    pid: nextPid++, name: items.map(i => i.name).join(" + "), iconKeys: items.map(i => i.name), state: "New",
+    priority: priority, arrival: msg ? msg.time : time,
+    burst: total, remaining: total, station: STATIONS[0],
+    threads: [], children: [], open: false, firstRun: null, finish: null, ioLeft: 0, qOrder: 0
+  };
+  procs.push(p);
+  log("Create Process: order #" + p.pid + " " + p.name + " (" + PRIORITY_NAMES[priority] + ", prep " + total + ")");
+  // A combo is the parent; its default options are the child threads
+  items.forEach(item => item.threads.forEach(name => addThread(p, name)));
+  // Combo children are shown as a hierarchy under the parent
+  items.forEach(item => (item.children || []).forEach(c => p.children.push(c)));
+  return p;   // the order enters the ready queue on the next tick (New -> Ready)
+}
+
+function makeReady(p) {
+  p.state = "Ready";
+  p.qOrder = ++queueCounter;   // place in line (used by Round Robin)
+}
+
+function addThread(p, name) {
+  p.threads.push({ tid: nextTid++, pid: p.pid, name: name, state: "Pending", pc: 0 });
+  log("Create Thread: '" + name + "' for order #" + p.pid);
+}
+
+function createThread(pid) {
+  const p = procs.find(x => x.pid === pid);
+  const name = prompt("Name of the sub-task (example: Choose drink):", "Choose drink");
+  if (p && name) addThread(p, name.trim());
+}
+
+function joinThreads(pid) {
+  const p = procs.find(x => x.pid === pid);
+  p.threads.forEach(t => { if (t.state === "Pending") { t.state = "Done"; t.pc = 1; } });
+  log("Join Thread: all sub-tasks of order #" + pid + " finished");
+  // An order that only waited for its threads can now finish
+  if (p.state === "Waiting" && p.remaining === 0 && p.ioLeft === 0) completeOrder(p, time);
+}
+
+function ioRequest(pid) {
+  const p = procs.find(x => x.pid === pid);
+  if (p === running) running = null;
+  p.state = "Waiting";
+  p.ioLeft = IO_TICKS;
+  log("I/O Request: order #" + pid + " waits " + IO_TICKS + " ticks for the card to go through");
+  why = "Order #" + pid + " made an I/O Request, so it left the workstation to wait for the card check.";
+}
+
+function yieldOrder(pid) {
+  const p = procs.find(x => x.pid === pid);
+  makeReady(p);
+  running = null;
+  log("Yield: order #" + pid + " steps aside for another order");
+  why = "Order #" + pid + " yielded, so the scheduler will pick again on the next tick.";
+}
+
+function terminateOrder(pid) {
+  const p = procs.find(x => x.pid === pid);
+  if (p === running) running = null;
+  procs = procs.filter(x => x !== p);
+  log(p.state === "Terminated" ? "Terminate Process: removed finished order #" + pid
+                               : "Terminate Process: order #" + pid + " was cancelled");
+  if (p.state !== "Terminated") say("crew", "Order #" + pid + " was cancelled.");
+}
+
+function completeOrder(p, finishTime) {
+  p.state = "Terminated";
+  p.finish = finishTime;
+  p.station = STATIONS[4];
+  completed.push(p);
+  log("Order #" + p.pid + " (" + p.name + ") is done");
+  say("crew", "Order #" + p.pid + " is ready! Please drive to the pickup window.");
+}
+
+// Called when an order has no prep time left
+function finishPrep(p) {
+  if (p.threads.some(t => t.state === "Pending")) {
+    p.state = "Waiting";
+    log("Order #" + p.pid + " waits for its sub-tasks to join");
+  } else {
+    completeOrder(p, time + 1);
+  }
+}
+
+// ---------- Scheduler ----------
+// The order with the LOWEST key is served first. Each algorithm uses a different key.
+function key(p) {
+  const algo = $("algo").value;
+  if (algo === "FCFS") return p.arrival * 1000 + p.pid;
+  if (algo === "SJF")  return p.remaining * 1000 + p.pid;
+  if (algo === "RR")   return p.qOrder;
+  return p.priority * 1000000 + p.arrival * 1000 + p.pid;   // Priority
+}
+
+function bestOf(list) {
+  let best = null;
+  list.forEach(p => { if (!best || key(p) < key(best)) best = p; });
+  return best;
+}
+
+function readyOrders() { return procs.filter(p => p.state === "Ready"); }
+
+// ---------- Clock tick ----------
+function pickReason(p, algo, quantum) {
+  if (algo === "FCFS") return "FCFS selected #" + p.pid + ": it arrived first (t=" + p.arrival + ").";
+  if (algo === "SJF")  return "SJF selected #" + p.pid + ": shortest remaining burst (" + p.remaining + " ticks).";
+  if (algo === "RR")   return "Round Robin selected #" + p.pid + ": first in the queue, runs up to " + quantum + " ticks.";
+  return "Priority selected #" + p.pid + ": highest priority (" + PRIORITY_NAMES[p.priority] + ").";
+}
+
+function tick() {
+  if (pos < history.length - 1) history.length = pos + 1;   // rewound: drop the old future
+  const algo = $("algo").value;
+  const quantum = Math.max(1, Number($("quantum").value) || 1);
+  const reasons = [];
+  const before = running;
+
+  // 0. New orders enter the ready queue
+  procs.filter(p => p.state === "New").forEach(p => {
+    makeReady(p);
+    log("Order #" + p.pid + " moved New -> Ready");
+  });
+
+  // 1. Round Robin: time quantum used up
+  if (running && algo === "RR" && quantumUsed >= quantum) {
+    if (readyOrders().length > 0) {
+      log("Quantum expired: order #" + running.pid + " goes back to the queue");
+      reasons.push("Context switch because the time quantum (" + quantum + " ticks) expired for #" + running.pid + ".");
+      makeReady(running);
+      running = null;
+    } else {
+      quantumUsed = 0;   // nobody else waiting, keep going
+    }
+  }
+
+  // 2. SJF and Priority can preempt the running order
+  if (running && (algo === "SJF" || algo === "PRIORITY")) {
+    const c = bestOf(readyOrders());
+    if (c && key(c) < key(running)) {
+      log("Preempt: order #" + c.pid + " is more urgent than #" + running.pid);
+      reasons.push(algo === "SJF"
+        ? "Preempted #" + running.pid + ": #" + c.pid + " has a shorter remaining burst (" + c.remaining + " vs " + running.remaining + ")."
+        : "Preempted #" + running.pid + ": #" + c.pid + " has higher priority (" + PRIORITY_NAMES[c.priority] + ").");
+      makeReady(running);
+      running = null;
+    }
+  }
+
+  // 3. If the workstation is free, dispatch the next order
+  if (!running) {
+    const next = bestOf(readyOrders());
+    if (next) {
+      running = next;
+      next.state = "Running";
+      quantumUsed = 0;
+      if (next.firstRun === null) next.firstRun = time;
+      if (lastPid !== null && lastPid !== next.pid) {
+        ctxSwitches++;
+        log("Context switch: saved order #" + lastPid + ", loaded order #" + next.pid);
       }
-      function say(from, text) {
-        chat.push({ from: from, text: text });
-      }
+      log("Dispatch: order #" + next.pid + " is now being prepared");
+      reasons.push(pickReason(next, algo, quantum));
+    }
+  } else if (running === before && reasons.length === 0) {
+    reasons.push("#" + running.pid + " keeps the workstation: no other order beats it under " + algo + ".");
+  }
 
-      // ---------- Tabs and mode ----------
-      function show(view) {
-        ["user", "pos", "kitchen"].forEach((v) => {
-          $("view-" + v).classList.toggle("hidden", v !== view);
-          $("tab-" + v).classList.toggle("active", v === view);
+  // 4. Run the order for one tick (or record idle time)
+  if (running) {
+    const p = running;
+    p.remaining--;
+    quantumUsed++;
+    lastPid = p.pid;
+    gantt.push(p.pid);
+    const progress = (p.burst - p.remaining) / p.burst;
+    p.station = STATIONS[Math.min(3, Math.floor(progress * 4))];
+    if (p.remaining === 0) {
+      running = null;
+      finishPrep(p);
+      reasons.push("Order #" + p.pid + " finished its prep time.");
+    }
+  } else {
+    gantt.push(null);
+    reasons.push("CPU idle: no order is ready.");
+  }
+
+  // 5. Orders waiting on I/O count down
+  procs.forEach(p => {
+    if (p.state === "Waiting" && p.ioLeft > 0) {
+      p.ioLeft--;
+      if (p.ioLeft === 0) {
+        log("I/O complete for order #" + p.pid);
+        if (p.remaining > 0) makeReady(p); else finishPrep(p);
+      }
+    }
+  });
+
+  why = reasons.join(" ");
+  time++;
+  history.push(null);              // render() fills the newest slot with the current state
+  pos = history.length - 1;
+  render();
+}
+
+// ---------- Time machine ----------
+// Each history entry is the whole simulator state saved as text.
+function snap() {
+  return JSON.stringify({
+    procs, completed, logs, gantt, inbox, chat, ticket, activeMsg, why, time,
+    runningPid: running ? running.pid : null, lastPid, nextPid, nextTid, nextMsgId,
+    queueCounter, quantumUsed, ctxSwitches, algo: $("algo").value, quantum: $("quantum").value
+  });
+}
+
+function restore(i) {
+  const s = JSON.parse(history[i]);
+  ({ procs, completed, logs, gantt, inbox, chat, ticket, activeMsg, why, time, lastPid, nextPid,
+     nextTid, nextMsgId, queueCounter, quantumUsed, ctxSwitches } = s);
+  running = procs.find(p => p.pid === s.runningPid) || null;
+  $("algo").value = s.algo;
+  $("quantum").value = s.quantum;
+}
+
+function gotoStep(i) {
+  if (timer) toggleRun();
+  pos = Number(i);
+  restore(pos);
+  render();
+}
+function stepBack() { if (pos > 0) gotoStep(pos - 1); }
+function stepForward() { if (pos < history.length - 1) gotoStep(pos + 1); }
+
+// ---------- Export ----------
+function download(filename, text, type) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: type }));
+  a.download = filename;
+  a.click();
+}
+
+function orderRows() {
+  return completed.map(p => ({
+    pid: p.pid, order: p.name, type: PRIORITY_NAMES[p.priority], arrival: p.arrival, burst: p.burst,
+    firstRun: p.firstRun, finish: p.finish, waiting: turnaround(p) - p.burst,
+    turnaround: turnaround(p), response: p.firstRun - p.arrival
+  }));
+}
+
+function exportJSON() {
+  const report = {
+    algorithm: $("algo").value, quantum: Number($("quantum").value), totalTicks: time,
+    contextSwitches: ctxSwitches,
+    averages: { waiting: avg(p => turnaround(p) - p.burst), turnaround: avg(turnaround), response: avg(p => p.firstRun - p.arrival) },
+    orders: orderRows(), gantt: gantt, log: logs
+  };
+  download("drivethru-benchmark.json", JSON.stringify(report, null, 2), "application/json");
+}
+
+function exportCSV() {
+  const head = ["pid", "order", "type", "arrival", "burst", "firstRun", "finish", "waiting", "turnaround", "response"];
+  const lines = orderRows().map(r => head.map(k => '"' + r[k] + '"').join(","));
+  download("drivethru-orders.csv", [head.join(",")].concat(lines).join("\n"), "text/csv");
+}
+
+// ---------- Small UI helpers ----------
+function toggleOpen(pid) { const p = procs.find(x => x.pid === pid); p.open = !p.open; }
+function showTCB(pid) { tcbPid = pid; render(); }
+function closeTCB() { tcbPid = null; render(); }
+
+function toggleRun() {
+  if (timer) { clearInterval(timer); timer = null; $("runBtn").textContent = "Auto run"; }
+  else { timer = setInterval(tick, 800); $("runBtn").textContent = "Pause"; }
+}
+
+// ---------- Demo and reset ----------
+function loadDemo() {
+  // [customer message, menu indexes, order type]
+  [["One spaghetti please", [0], 2],
+   ["Combo meal for the VIP table", [6], 1],
+   ["Chicken for delivery", [4], 3],
+   ["Fries and a drink", [1, 3], 2]].forEach(([text, items, type]) => {
+    const msg = { id: nextMsgId++, text: text, time: time, handled: true };
+    inbox.push(msg);
+    say("me", text);
+    const p = createProcess(items.map(i => MENU[i]), type, msg);
+    say("crew", "Order #" + p.pid + " confirmed: " + p.name + ".");
+  });
+  show("kitchen");
+  render();
+}
+
+function resetAll() {
+  if (timer) toggleRun();
+  procs = []; completed = []; logs = []; gantt = [];
+  inbox = []; chat = []; ticket = []; activeMsg = null;
+  running = null; lastPid = null;
+  time = 0; nextPid = 1; nextTid = 1; nextMsgId = 1; queueCounter = 0;
+  quantumUsed = 0; ctxSwitches = 0;
+  why = ""; history = [null]; pos = 0;
+  say("crew", "Welcome to the drive-thru! What can we get you?");
+  log("Kernel booted. Drive-thru is open.");
+  render();
+}
+
+// ---------- Drawing ----------
+const GANTT_COLORS = ["#6b7c3f", "#8b6b4a", "#8f8247", "#55703f", "#a0714f", "#6b5a45", "#7f8f58", "#94703c"];
+function pidColor(pid) { return GANTT_COLORS[pid % GANTT_COLORS.length]; }
+
+const turnaround = p => p.finish - p.arrival;
+const avg = fn => completed.length === 0 ? "-" :
+  (completed.reduce((sum, p) => sum + fn(p), 0) / completed.length).toFixed(2);
+
+function render() {
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = L(el.dataset.t));
+  $("vm-story").classList.toggle("on", viewMode === "story");
+  $("vm-os").classList.toggle("on", viewMode === "os");
+  $("clock").textContent = "Time: " + time;
+  const waiting = inbox.filter(m => !m.handled);
+  $("inboxCount").textContent = waiting.length || "";
+  $("queueCount").textContent = procs.filter(p => p.state !== "Terminated").length || "";
+
+  // Customer chat
+  $("chat").innerHTML = chat.map(c => '<div class="bubble ' + c.from + '">' + esc(c.text) + "</div>").join("");
+  $("chat").scrollTop = $("chat").scrollHeight;
+
+  // POS: inbox, menu, ticket
+  $("inbox").innerHTML = waiting.length === 0 ? '<span class="help">No new messages. Send one from the Customer chat tab.</span>' :
+    waiting.map(m => '<div class="msg ' + (m.id === activeMsg ? "sel" : "") + '"><div>' + esc(m.text) + "</div>" +
+      "<small>Arrived at t=" + m.time + '</small><button class="sm" onclick="pickMessage(' + m.id + ')">Take this order</button></div>').join("");
+  $("menu").innerHTML = MENU.map((item, i) =>
+    '<button onclick="addItem(' + i + ')"><span class="food">' + img(item.name) + "</span>" + item.name + "<small>" + item.burst + " ticks</small></button>").join("");
+  const msg = inbox.find(m => m.id === activeMsg);
+  $("ticketText").textContent = msg ? 'Customer says: "' + msg.text + '"' : "No customer message selected (optional).";
+  $("ticket").innerHTML = ticket.length === 0 ? '<span class="help">Ticket is empty.</span>' :
+    ticket.map((item, i) => '<div class="ticket-item"><span><span class="mini">' + img(item.name) + '</span> ' + item.name + " (" + item.burst + ')</span><button class="sm" onclick="removeItem(' + i + ')">Remove</button></div>').join("");
+
+  // Kitchen: PCB table. Combo orders get child rows; every order gets a 5-state tracker
+  const stateNames = ["New", "Ready", "Running", "Waiting", "Terminated"];
+  $("table").innerHTML = procs.length === 0
+    ? '<tr><td colspan="9">The queue is empty. Take an order in the Crew POS tab, or press "Load demo orders".</td></tr>'
+    : procs.map(p => {
+        const btn = (label, fn) => '<button class="sm" onclick="sys(() => ' + fn + "(" + p.pid + '))">' + label + "</button>";
+        let actions;
+        if (p.state === "Terminated") actions = btn(L("bRemove"), "terminateOrder");
+        else {
+          actions = btn(L("bIO"), "ioRequest");
+          if (p.state === "Running") actions += btn(L("bYield"), "yieldOrder");
+          actions += btn(L("bThread"), "createThread") + btn(L("bJoin"), "joinThreads") + btn(L("bTerm"), "terminateOrder");
+        }
+        const life = '<div class="life">' + stateNames.map(n =>
+          '<i class="' + (n === p.state ? "on" : "") + '">' + pill(n) + "</i>").join("") + "</div>";
+        const doneCount = p.threads.filter(t => t.state === "Done").length;
+        const name = (p.children.length ? btn(p.open ? "▼" : "▶", "toggleOpen") + " " : "") + orderPics(p) + esc(p.name);
+        let rows = "<tr><td>#" + p.pid + "</td><td>" + name + "</td><td>" + p.burst + "</td><td>" + p.remaining +
+          "</td><td>" + PRIORITY_NAMES[p.priority] + '</td><td><span class="tag ' + p.state + '">' + stateLabel(p.state) + "</span>" + life +
+          '</td><td><button class="sm" onclick="showTCB(' + p.pid + ')">' + L("bTCB") + ' (' + doneCount + "/" + p.threads.length + ")</button></td><td>" +
+          p.station + '</td><td><div class="actions">' + actions + "</div></td></tr>";
+        if (p.open) p.children.forEach((c, i) => {
+          rows += '<tr class="child"><td>#' + p.pid + "." + (i + 1) + "</td><td>" + L("child") + " " + (i + 1) + ": " + '<span class="mini">' + img(c) + "</span> " + esc(c) +
+            '</td><td colspan="2">' + L("childOf") + " #" + p.pid + "</td><td></td><td>" + stateLabel(p.state) + '</td><td colspan="3"></td></tr>';
         });
-        const mode = view === "user" ? "user" : "kernel";
-        $("mode").textContent = mode.toUpperCase() + " MODE";
-        $("mode").className = "badge " + mode;
-      }
+        return rows;
+      }).join("");
 
-      // Every system-call button runs through here, then the screen is redrawn.
-      function sys(action) {
-        action();
-        render();
-      }
+  // CPU box
+  if (running) {
+    const done = Math.round((running.burst - running.remaining) / running.burst * 100);
+    $("cpu").className = "cpu busy";
+    $("cpu").innerHTML = '<div class="name">' + orderPics(running) + '#' + running.pid + " " + esc(running.name) + "</div>" +
+      '<div class="bar"><div style="width:' + done + '%"></div></div>' +
+      "<div>" + done + "% prepared &bull; " + running.remaining + " ticks left &bull; " + running.station + "</div>";
+  } else {
+    $("cpu").className = "cpu";
+    $("cpu").innerHTML = '<div class="name">Idle</div><div>' + L("cpuIdle") + "</div>";
+  }
 
-      // ---------- User mode: customer chat ----------
-      function sendMessage() {
-        const text = $("msg").value.trim();
-        if (!text) return;
-        // The arrival time is the moment the car speaks at the speaker box
-        inbox.push({ id: nextMsgId++, text: text, time: time, handled: false });
-        say("me", text);
-        say("crew", "Got it! The crew is reading your order.");
-        $("msg").value = "";
-        render();
-      }
+  // Customer order tracker, like a delivery app
+  const trackText = { New: "Order placed", Ready: "Confirmed, waiting in line", Running: "Preparing your food",
+                      Waiting: "On hold", Terminated: "Ready for pickup" };
+  const trackImg = { Running: "preparing", Waiting: "hold", Terminated: "ready" };
+  $("tracker").innerHTML = procs.map(p => {
+    const progress = Math.round((p.burst - p.remaining) / p.burst * 70);
+    const pct = p.state === "Terminated" ? 100 : p.state === "New" ? 10 : 20 + progress;
+    const statusPic = trackImg[p.state] ? '<span class="mini">' + img(trackImg[p.state]) + "</span> " : "";
+    return '<div class="track">' + orderPics(p) + "<b>Order #" + p.pid + "</b> " + esc(p.name) +
+      '<div class="bar"><div style="width:' + pct + '%"></div></div>' + statusPic + "<small>" + trackText[p.state] + "</small></div>";
+  }).join("");
 
-      // ---------- Kernel mode: POS ----------
-      function pickMessage(id) {
-        activeMsg = id;
-        render();
-      }
-      function addItem(index) {
-        ticket.push(MENU[index]);
-        render();
-      }
-      function removeItem(index) {
-        ticket.splice(index, 1);
-        render();
-      }
+  // "Why?" helper, time machine label, TCB modal
+  $("why").textContent = "Why? " + (why ? words(why) : "Nothing has run yet. Press Run tick.");
+  if (pos === history.length - 1) history[pos] = snap();   // newest slot always mirrors the live state
+  $("scrub").max = history.length - 1;
+  $("scrub").value = pos;
+  $("histLabel").textContent = pos === history.length - 1 ? "Live: tick " + pos
+    : "Viewing the past: tick " + pos + " of " + (history.length - 1) + ". Run tick continues from here.";
+  const mp = procs.find(x => x.pid === tcbPid);
+  $("modal").classList.toggle("hidden", !mp);
+  if (mp) {
+    $("modalBody").innerHTML = "<h2>" + L("mTitle") + " #" + mp.pid + " " + esc(mp.name) + "</h2>" +
+      '<p class="help">' + L("hState") + ": " + stateLabel(mp.state) + " &bull; " + L("hReg") + ": " + mp.station + "</p>" +
+      (mp.threads.length === 0 ? '<p class="help">No threads yet. Use "+ Sub-task" to create one.</p>' :
+        "<table><thead><tr><th>" + L("mTid") + "</th><th>" + L("mThread") + "</th><th>" + L("hState") + "</th><th>" + L("mRegs") + "</th></tr></thead><tbody>" +
+        mp.threads.map(t => "<tr><td>T" + t.tid + "</td><td>" + esc(t.name) + '</td><td><span class="tag ' +
+          (t.state === "Done" ? "Terminated" : "Waiting") + '">' + t.state + "</span></td><td>PC=" + t.pc +
+          ", REG=" + (t.state === "Done" ? "option saved" : "empty") + "</td></tr>").join("") + "</tbody></table>") +
+      '<div class="row" style="margin-top:12px"><button onclick="closeTCB()">Close</button></div>';
+  }
 
-      function finalizeOrder() {
-        if (ticket.length === 0) {
-          $("posHint").textContent = "Add at least one menu item first.";
-          return;
-        }
-        const msg = inbox.find((m) => m.id === activeMsg);
-        const p = createProcess(ticket, Number($("priority").value), msg);
-        if (msg) msg.handled = true;
-        say(
-          "crew",
-          "Order #" +
-            p.pid +
-            " confirmed: " +
-            p.name +
-            ". Please wait at the speaker box.",
-        );
-        ticket = [];
-        activeMsg = null;
-        render();
-        $("posHint").textContent =
-          "Order #" + p.pid + " was sent to the ready queue.";
-      }
+  // Gantt chart
+  // Consecutive ticks of the same order are merged into one segment stretched to its length
+  const segments = [];
+  gantt.forEach((pid, i) => {
+    const last = segments[segments.length - 1];
+    if (last && last.pid === pid) last.len++;
+    else segments.push({ pid: pid, start: i, len: 1 });
+  });
+  const mark = viewMode === "story" ? "#" : "P";
+  $("gantt").innerHTML = segments.length === 0 ? '<span class="help">Run a tick to start the timeline.</span>' :
+    segments.map((g, i) => '<div class="seg" style="width:' + g.len * 34 + 'px">' +
+      '<div class="blk' + (g.pid === null ? " idle" : "") + '"' + (g.pid === null ? "" : ' style="background:' + pidColor(g.pid) + '"') + ">" +
+      (g.pid === null ? "Idle" : mark + g.pid) + "</div>" +
+      '<span class="tk" style="left:0">' + g.start + "</span>" +
+      (i === segments.length - 1 ? '<span class="tk" style="left:100%">' + (g.start + g.len) + "</span>" : "") +
+      "</div>").join("");
+  $("gantt").scrollLeft = $("gantt").scrollWidth;
 
-      // ---------- System calls ----------
-      function createProcess(items, priority, msg) {
-        const total = items.reduce((sum, item) => sum + item.burst, 0);
-        const p = {
-          pid: nextPid++,
-          name: items.map((i) => i.icon + " " + i.name).join(" + "),
-          state: "New",
-          priority: priority,
-          arrival: msg ? msg.time : time,
-          burst: total,
-          remaining: total,
-          station: STATIONS[0],
-          threads: [],
-          children: [],
-          open: false,
-          firstRun: null,
-          finish: null,
-          ioLeft: 0,
-          qOrder: 0,
-        };
-        procs.push(p);
-        log(
-          "Create Process: order #" +
-            p.pid +
-            " " +
-            p.name +
-            " (" +
-            PRIORITY_NAMES[priority] +
-            ", prep " +
-            total +
-            ")",
-        );
-        // A combo is the parent; its default options are the child threads
-        items.forEach((item) =>
-          item.threads.forEach((name) => addThread(p, name)),
-        );
-        // Combo children are shown as a hierarchy under the parent
-        items.forEach((item) =>
-          (item.children || []).forEach((c) => p.children.push(c)),
-        );
-        return p; // the order enters the ready queue on the next tick (New -> Ready)
-      }
+  // Metrics
+  $("metrics").innerHTML = [
+    [avg(p => turnaround(p) - p.burst), L("mWait")],
+    [avg(turnaround), L("mTurn")],
+    [avg(p => p.firstRun - p.arrival), L("mResp")],
+    [ctxSwitches + " / " + completed.length, L("mCtx")]
+  ].map(m => '<div class="metric"><b>' + m[0] + "</b><span>" + m[1] + "</span></div>").join("");
 
-      function makeReady(p) {
-        p.state = "Ready";
-        p.qOrder = ++queueCounter; // place in line (used by Round Robin)
-      }
+  // Kernel log
+  $("log").textContent = logs.slice(-150).map(words).join("\n");
+  $("log").scrollTop = $("log").scrollHeight;
+}
 
-      function addThread(p, name) {
-        p.threads.push({
-          tid: nextTid++,
-          pid: p.pid,
-          name: name,
-          state: "Pending",
-          pc: 0,
-        });
-        log("Create Thread: '" + name + "' for order #" + p.pid);
-      }
+// ---------- Crew notes (Private Resources) ----------
+// Notes are private to the crew, so they are not saved in the time-machine history
+// and "Reset" does not erase them. They are kept in the browser's localStorage.
+let notes = [], noteEditing = null, nextNoteId = 1;
+try {
+  notes = JSON.parse(localStorage.getItem("crewNotes")) || [];
+  nextNoteId = notes.reduce((max, n) => Math.max(max, n.id), 0) + 1;
+} catch (e) { notes = []; }
 
-      function createThread(pid) {
-        const p = procs.find((x) => x.pid === pid);
-        const name = prompt(
-          "Name of the sub-task (example: Choose drink):",
-          "Choose drink",
-        );
-        if (p && name) addThread(p, name.trim());
-      }
+function saveNotes() { try { localStorage.setItem("crewNotes", JSON.stringify(notes)); } catch (e) {} }
 
-      function joinThreads(pid) {
-        const p = procs.find((x) => x.pid === pid);
-        p.threads.forEach((t) => {
-          if (t.state === "Pending") {
-            t.state = "Done";
-            t.pc = 1;
-          }
-        });
-        log("Join Thread: all sub-tasks of order #" + pid + " finished");
-        // An order that only waited for its threads can now finish
-        if (p.state === "Waiting" && p.remaining === 0 && p.ioLeft === 0)
-          completeOrder(p, time);
-      }
+function addNote() {                                   // create
+  const text = $("noteInput").value.trim();
+  if (!text) return;
+  notes.unshift({ id: nextNoteId++, text: text, stamp: new Date().toLocaleString() });
+  $("noteInput").value = "";
+  saveNotes(); renderNotes();
+}
+function editNote(id) { noteEditing = id; renderNotes(); if (id) $("noteEdit").focus(); }
+function saveNote(id) {                                // edit
+  const text = $("noteEdit").value.trim();
+  if (text) notes.find(n => n.id === id).text = text;
+  noteEditing = null;
+  saveNotes(); renderNotes();
+}
+function deleteNote(id) {                              // delete
+  notes = notes.filter(n => n.id !== id);
+  if (noteEditing === id) noteEditing = null;
+  saveNotes(); renderNotes();
+}
 
-      function ioRequest(pid) {
-        const p = procs.find((x) => x.pid === pid);
-        if (p === running) running = null;
-        p.state = "Waiting";
-        p.ioLeft = IO_TICKS;
-        log(
-          "I/O Request: order #" +
-            pid +
-            " waits " +
-            IO_TICKS +
-            " ticks for the card to go through",
-        );
-        why =
-          "Order #" +
-          pid +
-          " made an I/O Request, so it left the workstation to wait for the card check.";
-      }
+// Drawn only when a note action happens, so a note being typed is never wiped by the clock tick.
+function renderNotes() {
+  $("notesList").innerHTML = notes.length === 0 ? '<span class="help small">No notes yet.</span>' :
+    notes.map(n => n.id === noteEditing
+      ? '<div class="note"><input type="text" id="noteEdit" style="flex:1;min-width:0" value="' + esc(n.text).replace(/"/g, "&quot;") + '">' +
+        '<button class="sm" onclick="saveNote(' + n.id + ')">Save</button><button class="sm" onclick="editNote(null)">Cancel</button></div>'
+      : '<div class="note" title="' + n.stamp + '"><span>' + esc(n.text) + "</span>" +
+        '<button class="sm" onclick="editNote(' + n.id + ')">Edit</button>' +
+        '<button class="sm" onclick="deleteNote(' + n.id + ')">Delete</button></div>').join("");
+}
 
-      function yieldOrder(pid) {
-        const p = procs.find((x) => x.pid === pid);
-        makeReady(p);
-        running = null;
-        log("Yield: order #" + pid + " steps aside for another order");
-        why =
-          "Order #" +
-          pid +
-          " yielded, so the scheduler will pick again on the next tick.";
-      }
-
-      function terminateOrder(pid) {
-        const p = procs.find((x) => x.pid === pid);
-        if (p === running) running = null;
-        procs = procs.filter((x) => x !== p);
-        log(
-          p.state === "Terminated"
-            ? "Terminate Process: removed finished order #" + pid
-            : "Terminate Process: order #" + pid + " was cancelled",
-        );
-        if (p.state !== "Terminated")
-          say("crew", "Order #" + pid + " was cancelled.");
-      }
-
-      function completeOrder(p, finishTime) {
-        p.state = "Terminated";
-        p.finish = finishTime;
-        p.station = STATIONS[4];
-        completed.push(p);
-        log("Order #" + p.pid + " (" + p.name + ") is done");
-        say(
-          "crew",
-          "Order #" + p.pid + " is ready! Please drive to the pickup window.",
-        );
-      }
-
-      // Called when an order has no prep time left
-      function finishPrep(p) {
-        if (p.threads.some((t) => t.state === "Pending")) {
-          p.state = "Waiting";
-          log("Order #" + p.pid + " waits for its sub-tasks to join");
-        } else {
-          completeOrder(p, time + 1);
-        }
-      }
-
-      // ---------- Scheduler ----------
-      // The order with the LOWEST key is served first. Each algorithm uses a different key.
-      function key(p) {
-        const algo = $("algo").value;
-        if (algo === "FCFS") return p.arrival * 1000 + p.pid;
-        if (algo === "SJF") return p.remaining * 1000 + p.pid;
-        if (algo === "RR") return p.qOrder;
-        return p.priority * 1000000 + p.arrival * 1000 + p.pid; // Priority
-      }
-
-      function bestOf(list) {
-        let best = null;
-        list.forEach((p) => {
-          if (!best || key(p) < key(best)) best = p;
-        });
-        return best;
-      }
-
-      function readyOrders() {
-        return procs.filter((p) => p.state === "Ready");
-      }
-
-      // ---------- Clock tick ----------
-      function pickReason(p, algo, quantum) {
-        if (algo === "FCFS")
-          return (
-            "FCFS selected #" +
-            p.pid +
-            ": it arrived first (t=" +
-            p.arrival +
-            ")."
-          );
-        if (algo === "SJF")
-          return (
-            "SJF selected #" +
-            p.pid +
-            ": shortest remaining burst (" +
-            p.remaining +
-            " ticks)."
-          );
-        if (algo === "RR")
-          return (
-            "Round Robin selected #" +
-            p.pid +
-            ": first in the queue, runs up to " +
-            quantum +
-            " ticks."
-          );
-        return (
-          "Priority selected #" +
-          p.pid +
-          ": highest priority (" +
-          PRIORITY_NAMES[p.priority] +
-          ")."
-        );
-      }
-
-      function tick() {
-        if (pos < history.length - 1) history.length = pos + 1; // rewound: drop the old future
-        const algo = $("algo").value;
-        const quantum = Math.max(1, Number($("quantum").value) || 1);
-        const reasons = [];
-        const before = running;
-
-        // 0. New orders enter the ready queue
-        procs
-          .filter((p) => p.state === "New")
-          .forEach((p) => {
-            makeReady(p);
-            log("Order #" + p.pid + " moved New -> Ready");
-          });
-
-        // 1. Round Robin: time quantum used up
-        if (running && algo === "RR" && quantumUsed >= quantum) {
-          if (readyOrders().length > 0) {
-            log(
-              "Quantum expired: order #" +
-                running.pid +
-                " goes back to the queue",
-            );
-            reasons.push(
-              "Context switch because the time quantum (" +
-                quantum +
-                " ticks) expired for #" +
-                running.pid +
-                ".",
-            );
-            makeReady(running);
-            running = null;
-          } else {
-            quantumUsed = 0; // nobody else waiting, keep going
-          }
-        }
-
-        // 2. SJF and Priority can preempt the running order
-        if (running && (algo === "SJF" || algo === "PRIORITY")) {
-          const c = bestOf(readyOrders());
-          if (c && key(c) < key(running)) {
-            log(
-              "Preempt: order #" +
-                c.pid +
-                " is more urgent than #" +
-                running.pid,
-            );
-            reasons.push(
-              algo === "SJF"
-                ? "Preempted #" +
-                    running.pid +
-                    ": #" +
-                    c.pid +
-                    " has a shorter remaining burst (" +
-                    c.remaining +
-                    " vs " +
-                    running.remaining +
-                    ")."
-                : "Preempted #" +
-                    running.pid +
-                    ": #" +
-                    c.pid +
-                    " has higher priority (" +
-                    PRIORITY_NAMES[c.priority] +
-                    ").",
-            );
-            makeReady(running);
-            running = null;
-          }
-        }
-
-        // 3. If the workstation is free, dispatch the next order
-        if (!running) {
-          const next = bestOf(readyOrders());
-          if (next) {
-            running = next;
-            next.state = "Running";
-            quantumUsed = 0;
-            if (next.firstRun === null) next.firstRun = time;
-            if (lastPid !== null && lastPid !== next.pid) {
-              ctxSwitches++;
-              log(
-                "Context switch: saved order #" +
-                  lastPid +
-                  ", loaded order #" +
-                  next.pid,
-              );
-            }
-            log("Dispatch: order #" + next.pid + " is now being prepared");
-            reasons.push(pickReason(next, algo, quantum));
-          }
-        } else if (running === before && reasons.length === 0) {
-          reasons.push(
-            "#" +
-              running.pid +
-              " keeps the workstation: no other order beats it under " +
-              algo +
-              ".",
-          );
-        }
-
-        // 4. Run the order for one tick (or record idle time)
-        if (running) {
-          const p = running;
-          p.remaining--;
-          quantumUsed++;
-          lastPid = p.pid;
-          gantt.push(p.pid);
-          const progress = (p.burst - p.remaining) / p.burst;
-          p.station = STATIONS[Math.min(3, Math.floor(progress * 4))];
-          if (p.remaining === 0) {
-            running = null;
-            finishPrep(p);
-            reasons.push("Order #" + p.pid + " finished its prep time.");
-          }
-        } else {
-          gantt.push(null);
-          reasons.push("CPU idle: no order is ready.");
-        }
-
-        // 5. Orders waiting on I/O count down
-        procs.forEach((p) => {
-          if (p.state === "Waiting" && p.ioLeft > 0) {
-            p.ioLeft--;
-            if (p.ioLeft === 0) {
-              log("I/O complete for order #" + p.pid);
-              if (p.remaining > 0) makeReady(p);
-              else finishPrep(p);
-            }
-          }
-        });
-
-        why = reasons.join(" ");
-        time++;
-        history.push(null); // render() fills the newest slot with the current state
-        pos = history.length - 1;
-        render();
-      }
-
-      // ---------- Time machine ----------
-      // Each history entry is the whole simulator state saved as text.
-      function snap() {
-        return JSON.stringify({
-          procs,
-          completed,
-          logs,
-          gantt,
-          inbox,
-          chat,
-          ticket,
-          activeMsg,
-          why,
-          time,
-          runningPid: running ? running.pid : null,
-          lastPid,
-          nextPid,
-          nextTid,
-          nextMsgId,
-          queueCounter,
-          quantumUsed,
-          ctxSwitches,
-          algo: $("algo").value,
-          quantum: $("quantum").value,
-        });
-      }
-
-      function restore(i) {
-        const s = JSON.parse(history[i]);
-        ({
-          procs,
-          completed,
-          logs,
-          gantt,
-          inbox,
-          chat,
-          ticket,
-          activeMsg,
-          why,
-          time,
-          lastPid,
-          nextPid,
-          nextTid,
-          nextMsgId,
-          queueCounter,
-          quantumUsed,
-          ctxSwitches,
-        } = s);
-        running = procs.find((p) => p.pid === s.runningPid) || null;
-        $("algo").value = s.algo;
-        $("quantum").value = s.quantum;
-      }
-
-      function gotoStep(i) {
-        if (timer) toggleRun();
-        pos = Number(i);
-        restore(pos);
-        render();
-      }
-      function stepBack() {
-        if (pos > 0) gotoStep(pos - 1);
-      }
-      function stepForward() {
-        if (pos < history.length - 1) gotoStep(pos + 1);
-      }
-
-      // ---------- Export ----------
-      function download(filename, text, type) {
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(new Blob([text], { type: type }));
-        a.download = filename;
-        a.click();
-      }
-
-      function orderRows() {
-        return completed.map((p) => ({
-          pid: p.pid,
-          order: p.name,
-          type: PRIORITY_NAMES[p.priority],
-          arrival: p.arrival,
-          burst: p.burst,
-          firstRun: p.firstRun,
-          finish: p.finish,
-          waiting: turnaround(p) - p.burst,
-          turnaround: turnaround(p),
-          response: p.firstRun - p.arrival,
-        }));
-      }
-
-      function exportJSON() {
-        const report = {
-          algorithm: $("algo").value,
-          quantum: Number($("quantum").value),
-          totalTicks: time,
-          contextSwitches: ctxSwitches,
-          averages: {
-            waiting: avg((p) => turnaround(p) - p.burst),
-            turnaround: avg(turnaround),
-            response: avg((p) => p.firstRun - p.arrival),
-          },
-          orders: orderRows(),
-          gantt: gantt,
-          log: logs,
-        };
-        download(
-          "drivethru-benchmark.json",
-          JSON.stringify(report, null, 2),
-          "application/json",
-        );
-      }
-
-      function exportCSV() {
-        const head = [
-          "pid",
-          "order",
-          "type",
-          "arrival",
-          "burst",
-          "firstRun",
-          "finish",
-          "waiting",
-          "turnaround",
-          "response",
-        ];
-        const lines = orderRows().map((r) =>
-          head.map((k) => '"' + r[k] + '"').join(","),
-        );
-        download(
-          "drivethru-orders.csv",
-          [head.join(",")].concat(lines).join("\n"),
-          "text/csv",
-        );
-      }
-
-      // ---------- Small UI helpers ----------
-      function toggleOpen(pid) {
-        const p = procs.find((x) => x.pid === pid);
-        p.open = !p.open;
-      }
-      function showTCB(pid) {
-        tcbPid = pid;
-        render();
-      }
-      function closeTCB() {
-        tcbPid = null;
-        render();
-      }
-
-      function toggleRun() {
-        if (timer) {
-          clearInterval(timer);
-          timer = null;
-          $("runBtn").textContent = "Auto run";
-        } else {
-          timer = setInterval(tick, 800);
-          $("runBtn").textContent = "Pause";
-        }
-      }
-
-      // ---------- Demo and reset ----------
-      function loadDemo() {
-        // [customer message, menu indexes, order type]
-        [
-          ["One burger please", [0], 2],
-          ["Combo meal for the VIP table", [4], 1],
-          ["A chicken bucket for delivery", [3], 3],
-          ["Large fries and a drink", [1, 2], 2],
-        ].forEach(([text, items, type]) => {
-          const msg = {
-            id: nextMsgId++,
-            text: text,
-            time: time,
-            handled: true,
-          };
-          inbox.push(msg);
-          say("me", text);
-          const p = createProcess(
-            items.map((i) => MENU[i]),
-            type,
-            msg,
-          );
-          say("crew", "Order #" + p.pid + " confirmed: " + p.name + ".");
-        });
-        show("kitchen");
-        render();
-      }
-
-      function resetAll() {
-        if (timer) toggleRun();
-        procs = [];
-        completed = [];
-        logs = [];
-        gantt = [];
-        inbox = [];
-        chat = [];
-        ticket = [];
-        activeMsg = null;
-        running = null;
-        lastPid = null;
-        time = 0;
-        nextPid = 1;
-        nextTid = 1;
-        nextMsgId = 1;
-        queueCounter = 0;
-        quantumUsed = 0;
-        ctxSwitches = 0;
-        why = "";
-        history = [null];
-        pos = 0;
-        say("crew", "Welcome to the drive-thru! What can we get you?");
-        log("Kernel booted. Drive-thru is open.");
-        render();
-      }
-
-      // ---------- Drawing ----------
-      function pidColor(pid) {
-        return "hsl(" + ((pid * 67) % 360) + ", 55%, 42%)";
-      }
-
-      const turnaround = (p) => p.finish - p.arrival;
-      const avg = (fn) =>
-        completed.length === 0
-          ? "-"
-          : (
-              completed.reduce((sum, p) => sum + fn(p), 0) / completed.length
-            ).toFixed(2);
-
-      function render() {
-        document
-          .querySelectorAll("[data-t]")
-          .forEach((el) => (el.textContent = L(el.dataset.t)));
-        $("vm-story").classList.toggle("on", viewMode === "story");
-        $("vm-os").classList.toggle("on", viewMode === "os");
-        $("clock").textContent = "Time: " + time;
-        const waiting = inbox.filter((m) => !m.handled);
-        $("inboxCount").textContent = waiting.length || "";
-        $("queueCount").textContent =
-          procs.filter((p) => p.state !== "Terminated").length || "";
-
-        // Customer chat
-        $("chat").innerHTML = chat
-          .map(
-            (c) =>
-              '<div class="bubble ' + c.from + '">' + esc(c.text) + "</div>",
-          )
-          .join("");
-        $("chat").scrollTop = $("chat").scrollHeight;
-
-        // POS: inbox, menu, ticket
-        $("inbox").innerHTML =
-          waiting.length === 0
-            ? '<span class="help">No new messages. Send one from the Customer chat tab.</span>'
-            : waiting
-                .map(
-                  (m) =>
-                    '<div class="msg ' +
-                    (m.id === activeMsg ? "sel" : "") +
-                    '"><div>' +
-                    esc(m.text) +
-                    "</div>" +
-                    "<small>Arrived at t=" +
-                    m.time +
-                    '</small><button class="sm" onclick="pickMessage(' +
-                    m.id +
-                    ')">Take this order</button></div>',
-                )
-                .join("");
-        $("menu").innerHTML = MENU.map(
-          (item, i) =>
-            '<button onclick="addItem(' +
-            i +
-            ')"><span class="food">' +
-            item.icon +
-            "</span>" +
-            item.name +
-            "<small>" +
-            item.burst +
-            " ticks</small></button>",
-        ).join("");
-        const msg = inbox.find((m) => m.id === activeMsg);
-        $("ticketText").textContent = msg
-          ? 'Customer says: "' + msg.text + '"'
-          : "No customer message selected (optional).";
-        $("ticket").innerHTML =
-          ticket.length === 0
-            ? '<span class="help">Ticket is empty.</span>'
-            : ticket
-                .map(
-                  (item, i) =>
-                    '<div class="ticket-item"><span>' +
-                    item.icon +
-                    " " +
-                    item.name +
-                    " (" +
-                    item.burst +
-                    ')</span><button class="sm" onclick="removeItem(' +
-                    i +
-                    ')">Remove</button></div>',
-                )
-                .join("");
-
-        // Kitchen: PCB table. Combo orders get child rows; every order gets a 5-state tracker
-        const stateNames = ["New", "Ready", "Running", "Waiting", "Terminated"];
-        $("table").innerHTML =
-          procs.length === 0
-            ? '<tr><td colspan="9">The queue is empty. Take an order in the Crew POS tab, or press "Load demo orders".</td></tr>'
-            : procs
-                .map((p) => {
-                  const btn = (label, fn) =>
-                    '<button class="sm" onclick="sys(() => ' +
-                    fn +
-                    "(" +
-                    p.pid +
-                    '))">' +
-                    label +
-                    "</button>";
-                  let actions;
-                  if (p.state === "Terminated")
-                    actions = btn(L("bRemove"), "terminateOrder");
-                  else {
-                    actions = btn(L("bIO"), "ioRequest");
-                    if (p.state === "Running")
-                      actions += btn(L("bYield"), "yieldOrder");
-                    actions +=
-                      btn(L("bThread"), "createThread") +
-                      btn(L("bJoin"), "joinThreads") +
-                      btn(L("bTerm"), "terminateOrder");
-                  }
-                  const life =
-                    '<div class="life">' +
-                    stateNames
-                      .map(
-                        (n) =>
-                          '<i class="' +
-                          (n === p.state ? "on" : "") +
-                          '">' +
-                          pill(n) +
-                          "</i>",
-                      )
-                      .join("") +
-                    "</div>";
-                  const doneCount = p.threads.filter(
-                    (t) => t.state === "Done",
-                  ).length;
-                  const name =
-                    (p.children.length
-                      ? btn(p.open ? "▼" : "▶", "toggleOpen") + " "
-                      : "") + esc(p.name);
-                  let rows =
-                    "<tr><td>#" +
-                    p.pid +
-                    "</td><td>" +
-                    name +
-                    "</td><td>" +
-                    p.burst +
-                    "</td><td>" +
-                    p.remaining +
-                    "</td><td>" +
-                    PRIORITY_NAMES[p.priority] +
-                    '</td><td><span class="tag ' +
-                    p.state +
-                    '">' +
-                    stateLabel(p.state) +
-                    "</span>" +
-                    life +
-                    '</td><td><button class="sm" onclick="showTCB(' +
-                    p.pid +
-                    ')">' +
-                    L("bTCB") +
-                    " (" +
-                    doneCount +
-                    "/" +
-                    p.threads.length +
-                    ")</button></td><td>" +
-                    p.station +
-                    '</td><td><div class="actions">' +
-                    actions +
-                    "</div></td></tr>";
-                  if (p.open)
-                    p.children.forEach((c, i) => {
-                      rows +=
-                        '<tr class="child"><td>#' +
-                        p.pid +
-                        "." +
-                        (i + 1) +
-                        "</td><td>" +
-                        L("child") +
-                        " " +
-                        (i + 1) +
-                        ": " +
-                        (ICONS[c] || "🍽️") +
-                        " " +
-                        esc(c) +
-                        '</td><td colspan="2">' +
-                        L("childOf") +
-                        " #" +
-                        p.pid +
-                        "</td><td></td><td>" +
-                        stateLabel(p.state) +
-                        '</td><td colspan="3"></td></tr>';
-                    });
-                  return rows;
-                })
-                .join("");
-
-        // CPU box
-        if (running) {
-          const done = Math.round(
-            ((running.burst - running.remaining) / running.burst) * 100,
-          );
-          $("cpu").className = "cpu busy";
-          $("cpu").innerHTML =
-            '<div class="name">#' +
-            running.pid +
-            " " +
-            esc(running.name) +
-            "</div>" +
-            '<div class="bar"><div style="width:' +
-            done +
-            '%"></div></div>' +
-            "<div>" +
-            done +
-            "% prepared &bull; " +
-            running.remaining +
-            " ticks left &bull; " +
-            running.station +
-            "</div>";
-        } else {
-          $("cpu").className = "cpu";
-          $("cpu").innerHTML =
-            '<div class="name">Idle</div><div>' + L("cpuIdle") + "</div>";
-        }
-
-        // Customer order tracker, like a delivery app
-        const trackText = {
-          New: "Order placed",
-          Ready: "Confirmed, waiting in line",
-          Running: "Preparing your food 🍳",
-          Waiting: "On hold ⏳",
-          Terminated: "Ready for pickup ✅",
-        };
-        $("tracker").innerHTML = procs
-          .map((p) => {
-            const progress = Math.round(
-              ((p.burst - p.remaining) / p.burst) * 70,
-            );
-            const pct =
-              p.state === "Terminated"
-                ? 100
-                : p.state === "New"
-                  ? 10
-                  : 20 + progress;
-            return (
-              '<div class="track"><b>Order #' +
-              p.pid +
-              "</b> " +
-              esc(p.name) +
-              '<div class="bar"><div style="width:' +
-              pct +
-              '%"></div></div><small>' +
-              trackText[p.state] +
-              "</small></div>"
-            );
-          })
-          .join("");
-
-        // "Why?" helper, time machine label, TCB modal
-        $("why").textContent =
-          "Why? " + (why ? words(why) : "Nothing has run yet. Press Run tick.");
-        if (pos === history.length - 1) history[pos] = snap(); // newest slot always mirrors the live state
-        $("scrub").max = history.length - 1;
-        $("scrub").value = pos;
-        $("histLabel").textContent =
-          pos === history.length - 1
-            ? "Live: tick " + pos
-            : "Viewing the past: tick " +
-              pos +
-              " of " +
-              (history.length - 1) +
-              ". Run tick continues from here.";
-        const mp = procs.find((x) => x.pid === tcbPid);
-        $("modal").classList.toggle("hidden", !mp);
-        if (mp) {
-          $("modalBody").innerHTML =
-            "<h2>" +
-            L("mTitle") +
-            " #" +
-            mp.pid +
-            " " +
-            esc(mp.name) +
-            "</h2>" +
-            '<p class="help">' +
-            L("hState") +
-            ": " +
-            stateLabel(mp.state) +
-            " &bull; " +
-            L("hReg") +
-            ": " +
-            mp.station +
-            "</p>" +
-            (mp.threads.length === 0
-              ? '<p class="help">No threads yet. Use "+ Sub-task" to create one.</p>'
-              : "<table><thead><tr><th>" +
-                L("mTid") +
-                "</th><th>" +
-                L("mThread") +
-                "</th><th>" +
-                L("hState") +
-                "</th><th>" +
-                L("mRegs") +
-                "</th></tr></thead><tbody>" +
-                mp.threads
-                  .map(
-                    (t) =>
-                      "<tr><td>T" +
-                      t.tid +
-                      "</td><td>" +
-                      esc(t.name) +
-                      '</td><td><span class="tag ' +
-                      (t.state === "Done" ? "Terminated" : "Waiting") +
-                      '">' +
-                      t.state +
-                      "</span></td><td>PC=" +
-                      t.pc +
-                      ", REG=" +
-                      (t.state === "Done" ? "option saved" : "empty") +
-                      "</td></tr>",
-                  )
-                  .join("") +
-                "</tbody></table>") +
-            '<div class="row" style="margin-top:12px"><button onclick="closeTCB()">Close</button></div>';
-        }
-
-        // Gantt chart
-        $("gantt").innerHTML =
-          gantt.length === 0
-            ? '<span class="help">Run a tick to start the timeline.</span>'
-            : gantt
-                .map(
-                  (pid, i) =>
-                    '<div class="cell"><div class="' +
-                    (pid === null ? "idle" : "") +
-                    '"' +
-                    (pid === null
-                      ? ""
-                      : ' style="background:' + pidColor(pid) + '"') +
-                    ">" +
-                    (pid === null ? "-" : "#" + pid) +
-                    "</div>" +
-                    i +
-                    "</div>",
-                )
-                .join("");
-        $("gantt").scrollLeft = $("gantt").scrollWidth;
-
-        // Metrics
-        $("metrics").innerHTML = [
-          [avg((p) => turnaround(p) - p.burst), L("mWait")],
-          [avg(turnaround), L("mTurn")],
-          [avg((p) => p.firstRun - p.arrival), L("mResp")],
-          [ctxSwitches + " / " + completed.length, L("mCtx")],
-        ]
-          .map(
-            (m) =>
-              '<div class="metric"><b>' +
-              m[0] +
-              "</b><span>" +
-              m[1] +
-              "</span></div>",
-          )
-          .join("");
-
-        // Kernel log
-        $("log").textContent = logs.slice(-150).map(words).join("\n");
-        $("log").scrollTop = $("log").scrollHeight;
-      }
-
-      // ---------- Start up ----------
-      resetAll();
-      show("user");
-    </script>
-  </body>
+// ---------- Start up ----------
+loadStaticImages();
+resetAll();
+show("user");
+renderNotes();
+</script>
+</body>
 </html>
