@@ -139,7 +139,7 @@
 <body>
 
 <header>
-  <h1><span class="logo" data-img="logo"></span> Drive-Thru Express <small>OS Simulator</small></h1>
+  <h1><span class="logo" data-img="logo"></span> Drive 'n Dine<small>OS Simulator</small></h1>
   <div class="vm">
     <span>View Mode:</span>
     <button id="vm-story" onclick="setView('story')"><span class="mini" data-img="story"></span> Fast-Food Story Mode</button>
@@ -162,7 +162,7 @@
 <!-- ========== USER MODE: customer at the speaker box ========== -->
 <section id="view-user">
   <div class="hero"><div class="hero-ico" data-img="logo"></div>
-    <div><b style="font-size:1.1rem">Drive-Thru Express</b><div><span class="mini" data-img="rating"></span> 4.8 &bull; <span class="mini" data-img="delivery"></span> 15-25 min &bull; Fast food</div></div></div>
+    <div><b style="font-size:1.1rem">Drive 'n Dine</b><div><span class="mini" data-img="rating"></span> 4.8 &bull; <span class="mini" data-img="delivery"></span> 15-25 min &bull; Fast food</div></div></div>
   <p class="help">You are the customer at the speaker box. Type your whole order and send it. The crew reads it in the Crew POS tab.</p>
   <div class="card">
     <div id="chat"></div>
@@ -308,16 +308,16 @@ function loadStaticImages() { document.querySelectorAll("[data-img]").forEach(el
 
 // ---------- Constants ----------
 const MENU = [
-  { name: "Spaghetti",   burst: 5,  threads: [] },
-  { name: "Fries",       burst: 2,  threads: [] },
+  { name: "Spaghetti",   burst: 6,  threads: [] },
+  { name: "Fries",       burst: 3,  threads: [] },
   { name: "Sundae",      burst: 2,  threads: [] },
   { name: "Drinks",      burst: 1,  threads: [] },
   { name: "Chicken",     burst: 4,  threads: [] },
-  { name: "Kiddie Meal", burst: 5,  threads: ["Choose drink (Juice)", "Choose toy (Surprise)"],
+  { name: "Kiddie Meal", burst: 8,  threads: ["Choose drink (Juice)", "Choose toy (Surprise)"],
                          children: ["Spaghetti", "Fries", "Sundae"] },
-  { name: "Combo Meal",  burst: 6,  threads: ["Choose drink (Coke)", "Choose side (Fries)"],
+  { name: "Combo Meal",  burst: 10,  threads: ["Choose drink (Coke)", "Choose side (Fries)"],
                          children: ["Chicken", "Fries", "Drink"] },
-  { name: "Family Meal", burst: 10, threads: ["Choose drink (Sprite)", "Choose side (Rice)", "Choose dessert (Sundae)"],
+  { name: "Family Meal", burst: 12, threads: ["Choose drink (Sprite)", "Choose side (Rice)", "Choose dessert (Sundae)"],
                          children: ["Spaghetti", "Chicken", "Fries", "Drink"] }
 ];
 const PRIORITY_NAMES = { 1: "VIP", 2: "Drive-Thru", 3: "Delivery" };
